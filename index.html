@@ -18,19 +18,21 @@
             min-height: 100vh;
             color: #2c3e50;
             line-height: 1.6;
+            overflow-x: hidden; /* ป้องกันการเลื่อนแนวนอน */
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 20px 15px; /* ปรับ padding แนวนอน */
+            width: 100%;
         }
         
         /* Header Styles */
         header {
             background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
             color: white;
-            padding: 25px;
+            padding: 25px 15px; /* ปรับ padding แนวนอน */
             text-align: center;
             border-radius: 15px 15px 0 0;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
@@ -50,82 +52,21 @@
             margin-bottom: 10px;
         }
         
-        .character {
-            position: absolute;
-            bottom: 0;
-            height: 150px;
-            transition: all 0.3s ease;
-            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
-        }
-        
-        .character:hover {
-            transform: translateY(-10px) scale(1.05);
-        }
-        
-        .character-left {
-            left: 30px;
-        }
-        
-        .character-right {
-            right: 30px;
-        }
-        
-        /* Login Section */
-        .login-container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            max-width: 500px;
-            margin: 0 auto;
-            text-align: center;
-        }
-        
-        .login-container h2 {
-            color: #3a0ca3;
-            margin-bottom: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #3a0ca3;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border 0.3s;
-        }
-        
-        .form-control:focus {
-            border-color: #4361ee;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-        }
-        
-        /* Button Styles */
+        /* ปรับปุ่มให้สวยงามขึ้น */
         .btn {
             display: inline-block;
             background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 10px 18px; /* ปรับขนาด padding */
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 0.95rem; /* ปรับขนาดฟอนต์ */
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             text-decoration: none;
+            margin: 3px; /* ปรับระยะห่าง */
+            white-space: nowrap; /* ป้องกันข้อความในปุ่มขึ้นบรรทัดใหม่ */
         }
         
         .btn:hover {
@@ -152,8 +93,46 @@
         .btn-edit {
             background: linear-gradient(135deg, #f8961e 0%, #f3722c 100%);
         }
+
+        /* เพิ่มสไตล์สำหรับแท็บ */
+        .tab-container {
+            margin-top: 20px;
+        }
         
-        /* Panel Styles */
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 15px;
+            flex-wrap: wrap; /* อนุญาตให้ขึ้นบรรทัดใหม่ */
+            gap: 5px; /* ระยะห่างระหว่างปุ่ม */
+        }
+        
+        .tab-btn {
+            padding: 10px 15px;
+            background: #eee;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px 5px 0 0;
+        }
+        
+        .tab-btn.active {
+            background: #3a0ca3;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 0 5px 5px 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ส่วนอื่นๆ เหมือนเดิมทั้งหมด */
         .panel {
             display: none;
             background: white;
@@ -176,6 +155,8 @@
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 1px solid #eee;
+            flex-wrap: wrap; /* อนุญาตให้ขึ้นบรรทัดใหม่ */
+            gap: 10px; /* ระยะห่างระหว่างองค์ประกอบ */
         }
         
         .panel-title {
@@ -188,12 +169,14 @@
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
+            table-layout: fixed; /* ควบคุมความกว้างคอลัมน์ */
         }
         
         th, td {
-            padding: 12px 15px;
+            padding: 12px 10px; /* ปรับ padding */
             text-align: left;
             border-bottom: 1px solid #eee;
+            word-wrap: break-word; /* อนุญาตให้คำยาวขึ้นบรรทัดใหม่ */
         }
         
         th {
@@ -243,28 +226,52 @@
             color: #333;
         }
         
+        /* Login Section */
+        .login-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
         /* Responsive Styles */
         @media (max-width: 768px) {
-            .character {
-                height: 100px;
-            }
-            
-            .character-left {
-                left: 10px;
-            }
-            
-            .character-right {
-                right: 10px;
-            }
-            
             h1 {
                 font-size: 1.8rem;
-                padding-top: 100px;
+                padding-top: 20px;
             }
             
             .panel-header {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+                margin: 2px;
+            }
+            
+            table {
+                font-size: 0.9rem;
+            }
+            
+            th, td {
+                padding: 8px 5px;
             }
         }
     </style>
@@ -275,24 +282,22 @@
     <div class="container">
         <header>
             <div class="header-content">
-                <img src="https://cdn-icons-png.flaticon.com/512/1864/1864593.png" class="character character-left" alt="นักเรียน">
                 <h1>ระบบบันทึกคะแนนพฤติกรรมนักเรียน</h1>
-                <img src="https://cdn-icons-png.flaticon.com/512/1864/1864514.png" class="character character-right" alt="ครู">
             </div>
         </header>
 
         <!-- Login Section -->
         <div class="login-container" id="loginSection">
-            <h2>เข้าสู่ระบบ</h2>
+            <h2 style="text-align: center; margin-bottom: 20px;">เข้าสู่ระบบ</h2>
             <div class="form-group">
-                <label for="username">ชื่อผู้ใช้</label>
+                <label for="username"><strong>ชื่อผู้ใช้</strong></label>
                 <input type="text" id="username" class="form-control" placeholder="กรอกรหัสผู้ใช้">
             </div>
             <div class="form-group">
-                <label for="password">รหัสผ่าน</label>
+                <label for="password"><strong>รหัสผ่าน</strong></label>
                 <input type="password" id="password" class="form-control" placeholder="กรอกรหัสผ่าน">
             </div>
-            <button class="btn" onclick="login()">เข้าสู่ระบบ</button>
+            <button class="btn" onclick="login()" style="width: 100%;">เข้าสู่ระบบ</button>
         </div>
 
         <!-- Student Panel -->
@@ -305,10 +310,10 @@
             <table id="studentScoreTable">
                 <thead>
                     <tr>
-                        <th>วันที่</th>
-                        <th>รายการ</th>
-                        <th>คะแนนที่เปลี่ยนแปลง</th>
-                        <th>โดย</th>
+                        <th style="width: 20%;">วันที่</th>
+                        <th style="width: 40%;">รา��การ</th>
+                        <th style="width: 20%;">คะแนนที่เปลี่ยนแปลง</th>
+                        <th style="width: 20%;">โดย</th>
                     </tr>
                 </thead>
                 <tbody id="studentScoreBody">
@@ -329,10 +334,10 @@
             <table id="teacherStudentTable">
                 <thead>
                     <tr>
-                        <th>รหัสนักเรียน</th>
-                        <th>ชื่อนักเรียน</th>
-                        <th>คะแนนรวม</th>
-                        <th>การดำเนินการ</th>
+                        <th style="width: 20%;">รหัสนักเรียน</th>
+                        <th style="width: 40%;">ชื่อนักเรียน</th>
+                        <th style="width: 20%;">คะแนนรวม</th>
+                        <th style="width: 20%;">การดำเนินการ</th>
                     </tr>
                 </thead>
                 <tbody id="teacherStudentBody">
@@ -361,13 +366,43 @@
                     <table id="adminStudentTable">
                         <thead>
                             <tr>
-                                <th>รหัสนักเรียน</th>
-                                <th>ชื่อนักเรียน</th>
-                                <th>คะแนนรวม</th>
-                                <th>การดำเนินการ</th>
+                                <th style="width: 20%;">รหัสนักเรียน</th>
+                                <th style="width: 40%;">ชื่อนักเรียน</th>
+                                <th style="width: 20%;">คะแนนรวม</th>
+                                <th style="width: 20%;">การดำเนินการ</th>
                             </tr>
                         </thead>
                         <tbody id="adminStudentBody">
+                            <tr>
+                                <td>64001</td>
+                                <td>นักเรียน หนึ่ง</td>
+                                <td>-410</td>
+                                <td><button class="btn btn-edit" onclick="editUser('64001')"><i class="fas fa-edit"></i> แก้ไข</button></td>
+                            </tr>
+                            <tr>
+                                <td>64002</td>
+                                <td>นักเรียน สอง</td>
+                                <td>77</td>
+                                <td><button class="btn btn-edit" onclick="editUser('64002')"><i class="fas fa-edit"></i> แก้ไข</button></td>
+                            </tr>
+                            <tr>
+                                <td>64003</td>
+                                <td>นักเรียน สาม</td>
+                                <td>90</td>
+                                <td><button class="btn btn-edit" onclick="editUser('64003')"><i class="fas fa-edit"></i> แก้ไข</button></td>
+                            </tr>
+                            <tr>
+                                <td>64004</td>
+                                <td>นักเรียน สี่</td>
+                                <td>68</td>
+                                <td><button class="btn btn-edit" onclick="editUser('64004')"><i class="fas fa-edit"></i> แก้ไข</button></td>
+                            </tr>
+                            <tr>
+                                <td>64005</td>
+                                <td>นักเรียน ห้า</td>
+                                <td>77</td>
+                                <td><button class="btn btn-edit" onclick="editUser('64005')"><i class="fas fa-edit"></i> แก้ไข</button></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -376,12 +411,22 @@
                     <table id="adminTeacherTable">
                         <thead>
                             <tr>
-                                <th>รหัสครู</th>
-                                <th>ชื่อครู</th>
-                                <th>การดำเนินการ</th>
+                                <th style="width: 30%;">รหัสครู</th>
+                                <th style="width: 50%;">ชื่อครู</th>
+                                <th style="width: 20%;">การดำเนินการ</th>
                             </tr>
                         </thead>
                         <tbody id="adminTeacherBody">
+                            <tr>
+                                <td>t001</td>
+                                <td>ครู สมชาย</td>
+                                <td><button class="btn btn-edit" onclick="editUser('t001')"><i class="fas fa-edit"></i> แก้ไข</button></td>
+                            </tr>
+                            <tr>
+                                <td>t002</td>
+                                <td>ครู สมหญิง</td>
+                                <td><button class="btn btn-edit" onclick="editUser('t002')"><i class="fas fa-edit"></i> แก้ไข</button></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -478,25 +523,30 @@
         // ข้อมูลเริ่มต้น
         const defaultData = {
             users: [
-                { id: "64001", name: "นักเรียน หนึ่ง", password: "64001", role: "student", score: 85, logs: [
+                { id: "64001", name: "นักเรียน หนึ่ง", password: "64001", role: "student", score: -410, logs: [
                     { date: "2023-05-01T09:00:00", change: 5, by: "ครู สมชาย", reason: "ช่วยเหลือเพื่อน" },
-                    { date: "2023-05-03T10:30:00", change: -2, by: "ครู สมหญิง", reason: "ส่งงานช้า" }
+                    { date: "2023-05-03T10:30:00", change: -2, by: "ครู สมหญิง", reason: "ส่งงานช้า" },
+                    { date: "2023-05-05T08:15:00", change: -413, by: "ครู สมชาย", reason: "ขาดเรียนหลายครั้ง" }
                 ]},
-                { id: "64002", name: "นักเรียน สอง", password: "64002", role: "student", score: 72, logs: [
+                { id: "64002", name: "นักเรียน สอง", password: "64002", role: "student", score: 77, logs: [
                     { date: "2023-05-02T08:45:00", change: -5, by: "ครู สมหญิง", reason: "มาโรงเรียนสาย" },
-                    { date: "2023-05-04T14:15:00", change: 2, by: "ครู สมชาย", reason: "ตอบคำถามในชั้นเรียน" }
+                    { date: "2023-05-04T14:15:00", change: 2, by: "ครู สมชาย", reason: "ตอบคำถามในชั้นเรียน" },
+                    { date: "2023-05-06T09:30:00", change: 80, by: "ครู สมหญิง", reason: "ชนะการแข่งขันวิชาการ" }
                 ]},
                 { id: "64003", name: "นักเรียน สาม", password: "64003", role: "student", score: 90, logs: [
                     { date: "2023-05-01T11:20:00", change: 3, by: "ครู สมชาย", reason: "ทำงานกลุ่มดี" },
-                    { date: "2023-05-06T13:10:00", change: 4, by: "ครู สมหญิง", reason: "ช่วยครูยกของ" }
+                    { date: "2023-05-06T13:10:00", change: 4, by: "ครู สมหญิง", reason: "ช่วยครูยกของ" },
+                    { date: "2023-05-08T10:00:00", change: -7, by: "ครู สมชาย", reason: "ไม่ส่งงาน" }
                 ]},
                 { id: "64004", name: "นักเรียน สี่", password: "64004", role: "student", score: 68, logs: [
                     { date: "2023-05-03T10:00:00", change: -3, by: "ครู สมชาย", reason: "ไม่ทำการบ้าน" },
-                    { date: "2023-05-07T09:30:00", change: -2, by: "ครู สมหญิง", reason: "พูดคุยในชั้นเรียน" }
+                    { date: "2023-05-07T09:30:00", change: -2, by: "ครู สมหญิง", reason: "พูดคุยในชั้นเรียน" },
+                    { date: "2023-05-09T14:00:00", change: 73, by: "ครู สมหญิง", reason: "พัฒนาการดีขึ้น" }
                 ]},
                 { id: "64005", name: "นักเรียน ห้า", password: "64005", role: "student", score: 77, logs: [
                     { date: "2023-05-02T15:00:00", change: 5, by: "ครู สมหญิง", reason: "ชนะการแข่งขัน" },
-                    { date: "2023-05-05T08:20:00", change: -1, by: "ครู สมชาย", reason: "ลืมอุปกรณ์" }
+                    { date: "2023-05-05T08:20:00", change: -1, by: "ครู สมชาย", reason: "ลืมอุปกรณ์" },
+                    { date: "2023-05-07T11:45:00", change: 73, by: "ครู สมชาย", reason: "มีน้ำใจช่วยเหลือเพื่อน" }
                 ]},
                 { id: "t001", name: "ครู สมชาย", password: "t001", role: "teacher" },
                 { id: "t002", name: "ครู สมหญิง", password: "t002", role: "teacher" },
@@ -624,7 +674,7 @@
             }
             
             document.getElementById('studentTotalScore').innerHTML = `
-                <h3>คะแนนรวม: ${currentUser.score}</h3>
+                <h3>คะแนนรวม: <span class="${currentUser.score > 0 ? 'positive' : 'negative'}">${currentUser.score}</span></h3>
             `;
         }
 
@@ -642,7 +692,7 @@
                 row.innerHTML = `
                     <td>${student.id}</td>
                     <td>${student.name}</td>
-                    <td>${student.score}</td>
+                    <td class="${student.score > 0 ? 'positive' : 'negative'}">${student.score}</td>
                     <td>
                         <button class="btn btn-add" onclick="openAddScoreModal('${student.id}')">
                             <i class="fas fa-edit"></i> จัดการคะแนน
@@ -668,7 +718,7 @@
                 row.innerHTML = `
                     <td>${student.id}</td>
                     <td>${student.name}</td>
-                    <td>${student.score}</td>
+                    <td class="${student.score > 0 ? 'positive' : 'negative'}">${student.score}</td>
                     <td>
                         <button class="btn btn-edit" onclick="editUser('${student.id}')">
                             <i class="fas fa-edit"></i> แก้ไข
@@ -947,24 +997,6 @@
                     margin-bottom: 10px;
                     border-radius: 5px;
                     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                }
-                .tab-btn {
-                    padding: 10px 20px;
-                    background: #eee;
-                    border: none;
-                    cursor: pointer;
-                    font-size: 16px;
-                }
-                .tab-btn.active {
-                    background: #3a0ca3;
-                    color: white;
-                }
-                .tab-content {
-                    display: none;
-                    padding: 20px 0;
-                }
-                .tab-content.active {
-                    display: block;
                 }
             `;
             document.head.appendChild(style);
