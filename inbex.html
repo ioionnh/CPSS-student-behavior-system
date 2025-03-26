@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกคะแนนพฤติกรรมนักเรียน</title>
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #4b9cd3;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.2em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .character {
+            position: absolute;
+            bottom: 0;
+            height: 120px;
+        }
+        .character.left {
+            left: 20px;
+        }
+        .character.right {
+            right: 20px;
+        }
+        .login-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .login-container input {
+            padding: 10px;
+            margin: 10px 0;
+            width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .login-container button {
+            background-color: #4b9cd3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .login-container button:hover {
+            background-color: #3a7ba7;
+        }
+        .panel {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4b9cd3;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .action-btn {
+            padding: 5px 10px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .add-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .subtract-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .delete-btn {
+            background-color: #ff9800;
+            color: white;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 10px 10px 0 0;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #4b9cd3;
+            color: white;
+        }
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            background-color: white;
+        }
+        .log-entry {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 5px;
+        }
+        .log-entry:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+        .positive {
+            color: #4CAF50;
+        }
+        .negative {
+            color: #f44336;
+        }
+        .neutral {
+            color: #2196F3;
+        }
+        .user-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+        .student-badge {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .teacher-badge {
+            background-color: #2196F3;
+            color: white;
+        }
+        .admin-badge {
+            background-color: #9C27B0;
+            color: white;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #777;
+            font-size: 0.9em;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="https://cdn-icons-png.flaticon.com/512/1864/1864593.png" class="character left" alt="Student Character">
+            <h1>ระบบบันทึกคะแนนพฤติกรรมนักเรียน</h1>
+            <img src="https://cdn-icons-png.flaticon.com/512/1864/1864514.png" class="character right" alt="Teacher Character">
+        </header>
+
+        <div class="login-container" id="loginSection">
+            <h2>เข้าสู่ระบบ</h2>
+            <input type="text" id="username" placeholder="ชื่อผู้ใช้">
+            <input type="password" id="password" placeholder="รหัสผ่าน"><br>
+            <button onclick="login()">เข้าสู่ระบบ</button>
+        </div>
+
+        <!-- Student Panel -->
+        <div class="panel" id="studentPanel">
+            <h2>คะแนนพฤติกรรมของฉัน</h2>
+            <div id="studentInfo"></div>
+            <table id="studentScoreTable">
+                <thead>
+                    <tr>
+                        <th>วันที่</th>
+                        <th>รายการ</th>
+                        <th>คะแนนที่เปลี่ยนแปลง</th>
+                        <th>โดย</th>
+                    </tr>
+                </thead>
+                <tbody id="studentScoreBody">
+                </tbody>
+            </table>
+            <div id="studentTotalScore"></div>
+        </div>
+
+        <!-- Teacher Panel -->
+        <div class="panel" id="teacherPanel">
+            <h2>จัดการคะแนนนักเรียน</h2>
+            <button class="add-btn" onclick="openAddScoreModal()">เพิ่ม/ลดคะแนน</button>
+            
+            <table id="teacherStudentTable">
+                <thead>
+                    <tr>
+                        <th>รหัสนักเรียน</th>
+                        <th>ชื่อนักเรียน</th>
+                        <th>คะแนนรวม</th>
+                        <th>การดำเนินการ</th>
+                    </tr>
+                </thead>
+                <tbody id="teacherStudentBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Admin Panel -->
+        <div class="panel" id="adminPanel">
+            <div class="tab">
+                <button class="tablinks active" onclick="openTab(event, 'adminStudents')">นักเรียน</button>
+                <button class="tablinks" onclick="openTab(event, 'adminTeachers')">ครู</button>
+                <button class="tablinks" onclick="openTab(event, 'adminLogs')">ประวัติการเปลี่ยนแปลง</button>
+                <button class="tablinks" onclick="openTab(event, 'adminAddUser')">เพิ่มผู้ใช้</button>
+            </div>
+
+            <div id="adminStudents" class="tabcontent" style="display: block;">
+                <h2>จัดการข้อมูลนักเรียน</h2>
+                <table id="adminStudentTable">
+                    <thead>
+                        <tr>
+                            <th>รหัสนักเรียน</th>
+                            <th>ชื่อนักเรียน</th>
+                            <th>คะแนนรวม</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminStudentBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="adminTeachers" class="tabcontent">
+                <h2>จัดการข้อมูลครู</h2>
+                <table id="adminTeacherTable">
+                    <thead>
+                        <tr>
+                            <th>รหัสครู</th>
+                            <th>ชื่อครู</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTeacherBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="adminLogs" class="tabcontent">
+                <h2>ประวัติการเปลี่ยนแปลงคะแนน</h2>
+                <div id="adminLogsContainer">
+                    <!-- Log entries will be added here -->
+                </div>
+            </div>
+
+            <div id="adminAddUser" class="tabcontent">
+                <h2>เพิ่มผู้ใช้ใหม่</h2>
+                <div class="form-group">
+                    <label for="newUserType">ประเภทผู้ใช้:</label>
+                    <select id="newUserType">
+                        <option value="student">นักเรียน</option>
+                        <option value="teacher">ครู</option>
+                        <option value="admin">ผู้บริหาร</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="newUserId">รหัสผู้ใช้:</label>
+                    <input type="text" id="newUserId" placeholder="เช่น 64001 สำหรับนักเรียน">
+                </div>
+                <div class="form-group">
+                    <label for="newUserName">ชื่อผู้ใช้:</label>
+                    <input type="text" id="newUserName" placeholder="ชื่อ-สกุล">
+                </div>
+                <div class="form-group">
+                    <label for="newUserPassword">รหัสผ่าน:</label>
+                    <input type="password" id="newUserPassword" placeholder="รหัสผ่าน">
+                </div>
+                <button class="add-btn" onclick="addNewUser()">เพิ่มผู้ใช้</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            ระบบบันทึกคะแนนพฤติกรรมนักเรียน © 2023
+        </div>
+    </div>
+
+    <!-- Add Score Modal -->
+    <div id="addScoreModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addScoreModal')">&times;</span>
+            <h2>เพิ่ม/ลดคะแนนนักเรียน</h2>
+            <div class="form-group">
+                <label for="scoreStudentId">นักเรียน:</label>
+                <select id="scoreStudentId">
+                    <!-- Options will be added by JavaScript -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="scoreChange">จำนวนคะแนน:</label>
+                <input type="number" id="scoreChange" placeholder="ใส่จำนวนเต็ม (บวก=เพิ่ม, ลบ=ลด)">
+            </div>
+            <div class="form-group">
+                <label for="scoreReason">เหตุผล:</label>
+                <input type="text" id="scoreReason" placeholder="เช่น มาโรงเรียนสาย, ช่วยเหลือเพื่อน">
+            </div>
+            <button class="add-btn" onclick="submitScoreChange()">บันทึก</button>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editUserModal')">&times;</span>
+            <h2>แก้ไขข้��มูลผู้ใช้</h2>
+            <div class="form-group">
+                <label for="editUserId">รหัสผู้ใช้:</label>
+                <input type="text" id="editUserId" disabled>
+            </div>
+            <div class="form-group">
+                <label for="editUserName">ชื่อผู้ใช้:</label>
+                <input type="text" id="editUserName">
+            </div>
+            <div class="form-group">
+                <label for="editUserPassword">รหัสผ่านใหม่ (เว้นว่างหากไม่ต้องการเปลี่ยน):</label>
+                <input type="password" id="editUserPassword">
+            </div>
+            <button class="add-btn" onclick="updateUser()">บันทึกการเปลี่ยนแปลง</button>
+            <button class="delete-btn" onclick="deleteUser()">ลบผู้ใช้นี้</button>
+        </div>
+    </div>
+
+    <script>
+        // Database simulation
+        let users = [
+            { id: "64001", name: "นักเรียน หนึ่ง", password: "64001", role: "student", score: 85, logs: [
+                { date: "2023-05-01", change: 5, by: "ครู สมชาย", reason: "ช่วยเหลือเพื่อน" },
+                { date: "2023-05-03", change: -2, by: "ครู สมหญิง", reason: "ส่งงานช้า" },
+                { date: "2023-05-05", change: 3, by: "ครู สมชาย", reason: "มีน้ำใจ" }
+            ]},
+            { id: "64002", name: "นักเรียน สอง", password: "64002", role: "student", score: 72, logs: [
+                { date: "2023-05-02", change: -5, by: "ครู สมหญิง", reason: "มาโรงเรียนสาย" },
+                { date: "2023-05-04", change: 2, by: "ครู สมชาย", reason: "ตอบคำถามในชั้นเรียน" }
+            ]},
+            { id: "64003", name: "นักเรียน สาม", password: "64003", role: "student", score: 90, logs: [
+                { date: "2023-05-01", change: 3, by: "ครู สมชาย", reason: "ทำงานกลุ่มดี" },
+                { date: "2023-05-06", change: 4, by: "ครู สมหญิง", reason: "ช่วยครูยกของ" }
+            ]},
+            { id: "64004", name: "นักเรียน สี่", password: "64004", role: "student", score: 68, logs: [
+                { date: "2023-05-03", change: -3, by: "ครู สมชาย", reason: "ไม่ทำการบ้าน" },
+                { date: "2023-05-07", change: -2, by: "ครู สมหญิง", reason: "พูดคุยในชั้นเรียน" }
+            ]},
+            { id: "64005", name: "นักเรียน ห้า", password: "64005", role: "student", score: 77, logs: [
+                { date: "2023-05-02", change: 5, by: "ครู สมหญิง", reason: "ชนะการแข่งขัน" },
+                { date: "2023-05-05", change: -1, by: "ครู สมชาย", reason: "ลืมอุปกรณ์" }
+            ]},
+            { id: "t001", name: "ครู สมชาย", password: "t001", role: "teacher" },
+            { id: "t002", name: "ครู สมหญิง", password: "t002", role: "teacher" },
+            { id: "admin", name: "ผู้บริหาร ใหญ่", password: "admin", role: "admin" }
+        ];
+
+        let currentUser = null;
+        let allLogs = [];
+
+        // Initialize with some logs
+        function initializeLogs() {
+            users.forEach(user => {
+                if (user.role === "student" && user.logs) {
+                    user.logs.forEach(log => {
+                        allLogs.push({
+                            date: log.date,
+                            studentId: user.id,
+                            studentName: user.name,
+                            change: log.change,
+                            by: log.by,
+                            reason: log.reason,
+                            actionBy: log.by.split(" ")[1] // Extract teacher id from name
+                        });
+                    });
+                }
+            });
+        }
+
+        initializeLogs();
+
+        // Login function
+        function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            
+            currentUser = users.find(user => user.id === username && user.password === password);
+            
+            if (currentUser) {
+                document.getElementById("loginSection").style.display = "none";
+                
+                switch(currentUser.role) {
+                    case "student":
+                        showStudentPanel();
+                        break;
+                    case "teacher":
+                        showTeacherPanel();
+                        break;
+                    case "admin":
+                        showAdminPanel();
+                        break;
+                }
+            } else {
+                alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!");
+            }
+        }
+
+        // Show student panel
+        function showStudentPanel() {
+            const panel = document.getElementById("studentPanel");
+            panel.style.display = "block";
+            
+            document.getElementById("studentInfo").innerHTML = `
+                <p><strong>รหัสนักเรียน:</strong> ${currentUser.id}</p>
+                <p><strong>ชื่อนักเรียน:</strong> ${currentUser.name}</p>
+            `;
+            
+            const tbody = document.getElementById("studentScoreBody");
+            tbody.innerHTML = "";
+            
+            if (currentUser.logs && currentUser.logs.length > 0) {
+                currentUser.logs.forEach(log => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${log.date}</td>
+                        <td>${log.reason}</td>
+                        <td class="${log.change > 0 ? 'positive' : 'negative'}">${log.change > 0 ? '+' : ''}${log.change}</td>
+                        <td>${log.by}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } else {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td colspan="4" style="text-align: center;">ไม่มีประวัติการเปลี่ยนแปลงคะแนน</td>`;
+                tbody.appendChild(row);
+            }
+            
+            document.getElementById("studentTotalScore").innerHTML = `
+                <h3>คะแนนรวม: ${currentUser.score}</h3>
+            `;
+        }
+
+        // Show teacher panel
+        function showTeacherPanel() {
+            const panel = document.getElementById("teacherPanel");
+            panel.style.display = "block";
+            
+            const tbody = document.getElementById("teacherStudentBody");
+            tbody.innerHTML = "";
+            
+            const students = users.filter(user => user.role === "student");
+            students.forEach(student => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.score}</td>
+                    <td>
+                        <button class="add-btn" onclick="openAddScoreModal('${student.id}')">จัดการคะแนน</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Show admin panel
+        function showAdminPanel() {
+            const panel = document.getElementById("adminPanel");
+            panel.style.display = "block";
+            
+            // Load students
+            const studentTbody = document.getElementById("adminStudentBody");
+            studentTbody.innerHTML = "";
+            
+            const students = users.filter(user => user.role === "student");
+            students.forEach(student => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.score}</td>
+                    <td>
+                        <button class="add-btn" onclick="editUser('${student.id}')">แก้ไข</button>
+                    </td>
+                `;
+                studentTbody.appendChild(row);
+            });
+            
+            // Load teachers
+            const teacherTbody = document.getElementById("adminTeacherBody");
+            teacherTbody.innerHTML = "";
+            
+            const teachers = users.filter(user => user.role === "teacher");
+            teachers.forEach(teacher => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${teacher.id}</td>
+                    <td>${teacher.name}</td>
+                    <td>
+                        <button class="add-btn" onclick="editUser('${teacher.id}')">แก้ไข</button>
+                    </td>
+                `;
+                teacherTbody.appendChild(row);
+            });
+            
+            // Load logs
+            const logsContainer = document.getElementById("adminLogsContainer");
+            logsContainer.innerHTML = "";
+            
+            if (allLogs.length > 0) {
+                allLogs.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(log => {
+                    const logEntry = document.createElement("div");
+                    logEntry.className = "log-entry";
+                    logEntry.innerHTML = `
+                        <p><strong>${log.date}</strong></p>
+                        <p>นักเรียน: ${log.studentName} (${log.studentId})</p>
+                        <p>คะแนนที่เปลี่ยนแปลง: <span class="${log.change > 0 ? 'positive' : 'negative'}">${log.change > 0 ? '+' : ''}${log.change}</span></p>
+                        <p>เหตุผล: ${log.reason}</p>
+                        <p>โดย: ${log.by}</p>
+                    `;
+                    logsContainer.appendChild(logEntry);
+                });
+            } else {
+                logsContainer.innerHTML = "<p>ไม่มีประวัติการเปลี่ยนแปลงคะแนน</p>";
+            }
+        }
+
+        // Open add score modal
+        function openAddScoreModal(studentId = null) {
+            const modal = document.getElementById("addScoreModal");
+            const select = document.getElementById("scoreStudentId");
+            select.innerHTML = "";
+            
+            const students = users.filter(user => user.role === "student");
+            students.forEach(student => {
+                const option = document.createElement("option");
+                option.value = student.id;
+                option.textContent = `${student.name} (${student.id})`;
+                if (studentId && student.id === studentId) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+            
+            document.getElementById("scoreChange").value = "";
+            document.getElementById("scoreReason").value = "";
+            
+            modal.style.display = "block";
+        }
+
+        // Submit score change
+        function submitScoreChange() {
+            const studentId = document.getElementById("scoreStudentId").value;
+            const change = parseInt(document.getElementById("scoreChange").value);
+            const reason = document.getElementById("scoreReason").value;
+            
+            if (!studentId || isNaN(change) || !reason) {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วน!");
+                return;
+            }
+            
+            const student = users.find(user => user.id === studentId);
+            if (student) {
+                student.score += change;
+                
+                const today = new Date().toISOString().split('T')[0];
+                const logEntry = {
+                    date: today,
+                    change: change,
+                    by: currentUser.name,
+                    reason: reason
+                };
+                
+                if (!student.logs) student.logs = [];
+                student.logs.push(logEntry);
+                
+                // Add to all logs
+                allLogs.push({
+                    date: today,
+                    studentId: student.id,
+                    studentName: student.name,
+                    change: change,
+                    by: currentUser.name,
+                    reason: reason,
+                    actionBy: currentUser.id
+                });
+                
+                alert("บันทึกการเปลี่ยนแปลงคะแนนเรียบร้อย!");
+                closeModal("addScoreModal");
+                
+                // Refresh the appropriate panel
+                if (currentUser.role === "teacher") {
+                    showTeacherPanel();
+                } else if (currentUser.role === "admin") {
+                    showAdminPanel();
+                }
+            }
+        }
+
+        // Open tab
+        function openTab(evt, tabName) {
+            const tabcontents = document.getElementsByClassName("tabcontent");
+            for (let i = 0; i < tabcontents.length; i++) {
+                tabcontents[i].style.display = "none";
+            }
+            
+            const tablinks = document.getElementsByClassName("tablinks");
+            for (let i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // Edit user
+        function editUser(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+            
+            document.getElementById("editUserId").value = user.id;
+            document.getElementById("editUserName").value = user.name;
+            document.getElementById("editUserPassword").value = "";
+            
+            document.getElementById("editUserModal").style.display = "block";
+        }
+
+        // Update user
+        function updateUser() {
+            const userId = document.getElementById("editUserId").value;
+            const userName = document.getElementById("editUserName").value;
+            const password = document.getElementById("editUserPassword").value;
+            
+            const user = users.find(u => u.id === userId);
+            if (user) {
+                user.name = userName;
+                if (password) {
+                    user.password = password;
+                }
+                
+                alert("บันทึกการเปลี่ยนแปลงเรียบร้อย!");
+                closeModal("editUserModal");
+                showAdminPanel();
+            }
+        }
+
+        // Delete user
+        function deleteUser() {
+            if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้นี้?")) return;
+            
+            const userId = document.getElementById("editUserId").value;
+            users = users.filter(u => u.id !== userId);
+            
+            // Also remove any logs associated with this user
+            if (users.find(u => u.id === userId)?.role === "student") {
+                allLogs = allLogs.filter(log => log.studentId !== userId);
+            } else {
+                allLogs = allLogs.filter(log => log.actionBy !== userId);
+            }
+            
+            alert("ลบผู้ใช้เรียบร้อย!");
+            closeModal("editUserModal");
+            showAdminPanel();
+        }
+
+        // Add new user
+        function addNewUser() {
+            const userType = document.getElementById("newUserType").value;
+            const userId = document.getElementById("newUserId").value;
+            const userName = document.getElementById("newUserName").value;
+            const password = document.getElementById("newUserPassword").value;
+            
+            if (!userId || !userName || !password) {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วน!");
+                return;
+            }
+            
+            if (users.some(u => u.id === userId)) {
+                alert("มีรหัสผู้ใช้นี้อยู่แล้ว!");
+                return;
+            }
+            
+            const newUser = {
+                id: userId,
+                name: userName,
+                password: password,
+                role: userType
+            };
+            
+            if (userType === "student") {
+                newUser.score = 80;
+                newUser.logs = [];
+            }
+            
+            users.push(newUser);
+            
+            alert("เพิ่มผู้ใช้ใหม่เรียบร้อย!");
+            document.getElementById("newUserId").value = "";
+            document.getElementById("newUserName").value = "";
+            document.getElementById("newUserPassword").value = "";
+            
+            showAdminPanel();
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+    </script>
+</body>
+                  </html>
