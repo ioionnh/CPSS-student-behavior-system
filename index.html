@@ -3,51 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบบันทึกคะแนนพฤติกรรมนักเรียน (เวอร์ชันปรับปรุง)</title>
+    <title>ระบบบันทึกคะแนนพฤติกรรมนักเรียน</title>
     <style>
         :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3f37c9;
-            --success-color: #4cc9f0;
-            --danger-color: #f72585;
-            --warning-color: #f8961e;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
         }
         
         body {
             font-family: 'Kanit', sans-serif;
-            background-color: #f5f7fa;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
             margin: 0;
             padding: 0;
-            color: #333;
-            line-height: 1.6;
+            min-height: 100vh;
+            color: var(--dark);
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 2rem;
         }
         
         header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
-            padding: 30px;
+            padding: 2rem;
             text-align: center;
             border-radius: 15px 15px 0 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
-            margin-bottom: 30px;
-        }
-        
-        header h1 {
-            margin: 0;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            position: relative;
-            z-index: 2;
+            margin-bottom: 2rem;
         }
         
         .character-container {
@@ -56,81 +48,81 @@
             align-items: flex-end;
             position: absolute;
             bottom: 0;
-            width: 100%;
+            width: 90%;
+            left: 5%;
             height: 150px;
-            left: 0;
-            padding: 0 30px;
-            box-sizing: border-box;
             z-index: 1;
         }
         
         .character {
             height: 140px;
             transition: all 0.3s ease;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
         }
         
         .character:hover {
-            transform: translateY(-10px);
+            transform: translateY(-10px) scale(1.05);
         }
         
-        .login-container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-            text-align: center;
-            max-width: 500px;
-            margin: 0 auto 30px;
-        }
-        
-        /* เพิ่มสไตล์อื่นๆ ที่ปรับปรุง... */
+        /* เพิ่มสไตล์อื่นๆ ที่จำเป็น */
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- โครงสร้าง HTML ที่ปรับปรุงแล้ว -->
-    
+    <div class="container">
+        <header>
+            <div class="character-container">
+                <img src="https://cdn-icons-png.flaticon.com/512/1864/1864593.png" class="character" alt="นักเรียน" id="char-left">
+                <h1>ระบบบันทึกคะแนนพฤติกรรมนักเรียน</h1>
+                <img src="https://cdn-icons-png.flaticon.com/512/1864/1864514.png" class="character" alt="ครู" id="char-right">
+            </div>
+        </header>
+
+        <!-- ส่วนประกอบอื่นๆ -->
+    </div>
+
     <script>
         // ระบบเก็บข้อมูลแบบถาวร
-        const STORAGE_KEY = 'studentBehaviorSystem';
+        const STORAGE_KEY = 'studentBehaviorSystem_v2';
         
+        // ข้อมูลเริ่มต้น
+        const defaultData = {
+            users: [
+                { id: "64001", name: "นักเรียน หนึ่ง", password: "64001", role: "student", score: 85, logs: [] },
+                { id: "64002", name: "นักเรียน สอง", password: "64002", role: "student", score: 72, logs: [] },
+                { id: "64003", name: "นักเรียน สาม", password: "64003", role: "student", score: 90, logs: [] },
+                { id: "64004", name: "นักเรียน สี่", password: "64004", role: "student", score: 68, logs: [] },
+                { id: "64005", name: "นักเรียน ห้า", password: "64005", role: "student", score: 77, logs: [] },
+                { id: "t001", name: "ครู สมชาย", password: "t001", role: "teacher" },
+                { id: "t002", name: "ครู สมหญิง", password: "t002", role: "teacher" },
+                { id: "admin", name: "ผู้บริหาร ใหญ่", password: "admin", role: "admin" }
+            ],
+            allLogs: []
+        };
+
         // โหลดข้อมูลจาก localStorage
         function loadData() {
             const savedData = localStorage.getItem(STORAGE_KEY);
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                users = data.users || users;
-                allLogs = data.allLogs || allLogs;
+            if (!savedData) {
+                // สร้างข้อมูลเริ่มต้นและบันทึก
+                initializeSampleLogs();
+                saveData();
+                return defaultData;
             }
+            return JSON.parse(savedData);
         }
-        
-        // บันทึกข้อมูลลง localStorage
-        function saveData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+
+        // บันทึกข้อมูล
+        function saveData(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data || {
                 users: users,
                 allLogs: allLogs,
                 lastUpdated: new Date().toISOString()
             }));
         }
-        
-        // เรียกโหลดข้อมูลเมื่อเริ่มต้น
-        loadData();
-        
-        // เมื่อมีการเปลี่ยนแปลงข้อมูล
-        function updateScore(studentId, change, reason) {
-            // ... โค้ดเดิม ...
-            saveData(); // บันทึกการเปลี่ยนแปลง
-        }
-        
-        // เพิ่มสมาชิกใหม่
-        function addNewUser() {
-            // ... โค้ดเดิม ...
-            saveData(); // บันทึกการเปลี่ยนแปลง
-        }
-        
-        // ฟังก์ชันอื่นๆ ที่ปรับปรุง...
+
+        // ระบบอื่นๆ ที่จำเป็น
     </script>
 </body>
 </html>
