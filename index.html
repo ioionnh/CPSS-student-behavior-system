@@ -647,6 +647,10 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label for="newUserSubClass">ห้องเรียนย่อย (เช่น 1 สำหรับ ม.1/1)</label>
+                    <input type="text" id="newUserSubClass" class="form-control" placeholder="เช่น 1, 2, 3...">
+                </div>
+                <div class="form-group">
                     <label for="newUserPassword">รหัสผ่าน</label>
                     <input type="password" id="newUserPassword" class="form-control" placeholder="รหัสผ่าน">
                 </div>
@@ -677,6 +681,10 @@
                         <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
                         <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
                     </select>
+                </div>
+                <div class="form-group" id="editUserSubClassGroup">
+                    <label for="editUserSubClass">ห้องเรียนย่อย</label>
+                    <input type="text" id="editUserSubClass" class="form-control" placeholder="เช่น 1, 2, 3...">
                 </div>
                 <div class="form-group">
                     <label for="editUserPassword">รหัสผ่านใหม่ (เว้นว่างหากไม่ต้องการเปลี่ยน)</label>
@@ -1413,6 +1421,7 @@
             document.getElementById('newUserId').value = '';
             document.getElementById('newUserName').value = '';
             document.getElementById('newUserClass').value = 'ม.1';
+            document.getElementById('newUserSubClass').value = '1';
             document.getElementById('newUserPassword').value = '';
             toggleClassField();
             document.getElementById('addUserModal').style.display = 'flex';
@@ -1422,11 +1431,14 @@
         function toggleClassField() {
             const userType = document.getElementById('newUserType').value;
             const classGroup = document.getElementById('newUserClassGroup');
+            const subClassGroup = document.getElementById('newUserSubClassGroup');
             
             if (userType === 'student') {
                 classGroup.style.display = 'block';
+                subClassGroup.style.display = 'block';
             } else {
                 classGroup.style.display = 'none';
+                subClassGroup.style.display = 'none';
             }
         }
 
@@ -1439,14 +1451,15 @@
             let userClass = '';
             
             if (userType === 'student') {
-                userClass = document.getElementById('newUserClass').value;
-                const subClass = prompt("กรอกห้องเรียนย่อย (เช่น 1 สำหรับ ม.1/1):");
-                if (subClass) {
-                    userClass = `${userClass}/${subClass}`;
-                } else {
+                const mainClass = document.getElementById('newUserClass').value;
+                const subClass = document.getElementById('newUserSubClass').value.trim();
+                
+                if (!subClass) {
                     alert('กรุณากรอกห้องเรียนย่อย!');
                     return;
                 }
+                
+                userClass = `${mainClass}/${subClass}`;
             }
             
             if (!userId || !userName || !password) {
@@ -1530,40 +1543,77 @@
             
             // ซ่อน/แสดงส่วนระดับชั้นสำหรับนักเรียน
             const classGroup = document.getElementById('editUserClassGroup');
+            const subClassGroup = document.getElementById('editUserSubClassGroup');
+            
             if (user.role === 'student') {
                 classGroup.style.display = 'block';
-                document.getElementById('editUserClass').value = user.class ? user.class.split('/')[0] : 'ม.1';
+                subClassGroup.style.display = 'block';
+                
+                // ตั้งค่าชั้นเรียนหลักและห้องเรียนย่อยจากข้อมูลเดิม
+                if (user.class) {
+                    const [mainClass, subClass] = user.class.split('/');
+                    document.getElementById('editUserClass').value = mainClass || 'ม.1';
+                    document.getElementById('editUserSubClass').value = subClass || '1';
+                } else {
+                    document.getElementById('editUserClass').value = 'ม.1';
+                    document.getElementById('editUserSubClass').value = '1';
+                }
             } else {
                 classGroup.style.display = 'none';
+                subClassGroup.style.display = 'none';
             }
             
             document.getElementById('editUserModal').style.display = 'flex';
         }
 
-        // อัปเดตผู้ใช้
+        // อัปเดตผู้ใช้ (แก้ไขแล้ว)
         function updateUser() {
             const userId = document.getElementById('editUserId').value;
             const userName = document.getElementById('editUserName').value.trim();
             const password = document.getElementById('editUserPassword').value;
             const userClass = document.getElementById('editUserClass').value;
+            const userSubClass = document.getElementById('editUserSubClass').value.trim();
             
             const user = users.find(u => u.id === userId);
             if (user) {
+                // ตรวจสอบข้อมูลที่จำเป็น
+                if (!userName) {
+                    alert('กรุณากรอกชื่อนักเรียน!');
+                    return;
+                }
+                
                 user.name = userName;
+                
+                // เปลี่ยนรหัสผ่านถ้ามีการกรอก
                 if (password) {
+                    if (password.length < 6) {
+                        alert('รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร!');
+                        return;
+                    }
                     user.password = password;
                 }
                 
+                // สำหรับนักเรียน: อัปเดตชั้นเรียน
                 if (user.role === 'student') {
-                    // รักษาห้องเรียนย่อยเดิมหากมี
-                    const currentClass = user.class || '';
-                    const subClass = currentClass.split('/')[1] || '1';
-                    user.class = `${userClass}/${subClass}`;
+                    if (!userSubClass) {
+                        alert('กรุณากรอกห้องเรียนย่อย!');
+                        return;
+                    }
+                    user.class = `${userClass}/${userSubClass}`;
                 }
                 
                 saveData({ users, allLogs, pendingRequests });
                 closeModal('editUserModal');
-                showAdminPanel();
+                
+                // รีเฟรชข้อมูลตามบทบาทผู้ใช้ปัจจุบัน
+                if (currentUser.role === 'admin') {
+                    if (user.role === 'student') {
+                        loadAdminStudents();
+                    } else if (user.role === 'teacher') {
+                        loadAdminTeachers();
+                    }
+                }
+                
                 alert('บันทึกการเปลี่ยนแปลงเรียบร้อย!');
             }
         }
@@ -1573,21 +1623,34 @@
             if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้นี้?')) return;
             
             const userId = document.getElementById('editUserId').value;
+            const userToDelete = users.find(u => u.id === userId);
+            
+            if (!userToDelete) return;
+            
             users = users.filter(u => u.id !== userId);
             
             // ลบประวัติที่เกี่ยวข้อง
-            if (users.find(u => u.id === userId)?.role === 'student') {
+            if (userToDelete.role === 'student') {
                 allLogs = allLogs.filter(log => log.studentId !== userId);
-            } else {
-                allLogs = allLogs.filter(log => log.actionBy !== userId);
             }
             
             // ลบคำขอที่เกี่ยวข้อง
-            pendingRequests = pendingRequests.filter(req => req.requestedBy !== userId && req.studentId !== userId);
+            pendingRequests = pendingRequests.filter(req => 
+                req.requestedBy !== userId && req.studentId !== userId
+            );
             
             saveData({ users, allLogs, pendingRequests });
             closeModal('editUserModal');
-            showAdminPanel();
+            
+            // รีเฟรชข้อมูลตามบทบาทผู้ใช้ปัจจุบัน
+            if (currentUser.role === 'admin') {
+                if (userToDelete.role === 'student') {
+                    loadAdminStudents();
+                } else if (userToDelete.role === 'teacher') {
+                    loadAdminTeachers();
+                }
+            }
+            
             alert('ลบผู้ใช้เรียบร้อย!');
         }
 
@@ -1614,4 +1677,4 @@
         };
     </script>
 </body>
-  </html>
+    </html>
