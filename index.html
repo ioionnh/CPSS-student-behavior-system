@@ -18,13 +18,13 @@
             min-height: 100vh;
             color: #2c3e50;
             line-height: 1.6;
-            overflow-x: hidden; /* ป้องกันการเลื่อนแนวนอน */
+            overflow-x: hidden;
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px 15px; /* ปรับ padding แนวนอน */
+            padding: 20px 15px;
             width: 100%;
         }
         
@@ -32,7 +32,7 @@
         header {
             background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
             color: white;
-            padding: 25px 15px; /* ปรับ padding แนวนอน */
+            padding: 25px 15px;
             text-align: center;
             border-radius: 15px 15px 0 0;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
@@ -41,32 +41,31 @@
             margin-bottom: 30px;
         }
         
-        .header-content {
-            position: relative;
-            z-index: 2;
-        }
-        
         h1 {
             font-size: 2.5rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
             margin-bottom: 10px;
         }
         
-        /* ปรับปุ่มให้สวยงามขึ้น */
+        /* ปุ่ม Styles */
         .btn {
             display: inline-block;
-            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
             color: white;
             border: none;
-            padding: 10px 18px; /* ปรับขนาด padding */
+            padding: 10px 15px;
             border-radius: 8px;
-            font-size: 0.95rem; /* ปรับขนาดฟอนต์ */
+            font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             text-decoration: none;
-            margin: 3px; /* ปรับระยะห่าง */
-            white-space: nowrap; /* ป้องกันข้อความในปุ่มขึ้นบรรทัดใหม่ */
+            margin: 3px;
+            white-space: nowrap;
+            text-align: center;
+            min-width: 80px;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .btn:hover {
@@ -74,8 +73,13 @@
             box-shadow: 0 6px 8px rgba(0,0,0,0.15);
         }
         
-        .btn:active {
-            transform: translateY(0);
+        .btn-login {
+            background: linear-gradient(135deg, #4cc9f0 0%, #4895ef 100%);
+        }
+        
+        .btn-login.active {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            animation: pulse 0.5s;
         }
         
         .btn-logout {
@@ -94,45 +98,30 @@
             background: linear-gradient(135deg, #f8961e 0%, #f3722c 100%);
         }
 
-        /* เพิ่มสไตล์สำหรับแท็บ */
-        .tab-container {
-            margin-top: 20px;
+        .btn-increase {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
         }
         
-        .tab-buttons {
-            display: flex;
-            margin-bottom: 15px;
-            flex-wrap: wrap; /* อนุญาตให้ขึ้นบรรทัดใหม่ */
-            gap: 5px; /* ระยะห่างระหว่างปุ่ม */
-        }
-        
-        .tab-btn {
-            padding: 10px 15px;
-            background: #eee;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 5px 5px 0 0;
-        }
-        
-        .tab-btn.active {
-            background: #3a0ca3;
-            color: white;
-        }
-        
-        .tab-content {
-            display: none;
-            padding: 20px;
-            background: white;
-            border-radius: 0 5px 5px 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .tab-content.active {
-            display: block;
+        .btn-decrease {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         }
 
-        /* ส่วนอื่นๆ เหมือนเดิมทั้งหมด */
+        .btn-approve {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+        
+        .btn-reject {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        /* เพิ่มสไตล์สำหรับกลุ่มปุ่ม */
+        .btn-group {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        /* Panel Styles */
         .panel {
             display: none;
             background: white;
@@ -148,6 +137,12 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
         .panel-header {
             display: flex;
             justify-content: space-between;
@@ -155,8 +150,8 @@
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 1px solid #eee;
-            flex-wrap: wrap; /* อนุญาตให้ขึ้นบรรทัดใหม่ */
-            gap: 10px; /* ระยะห่างระหว่างองค์ประกอบ */
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .panel-title {
@@ -169,14 +164,14 @@
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
-            table-layout: fixed; /* ควบคุมความกว้างคอลัมน์ */
+            table-layout: auto;
         }
         
         th, td {
-            padding: 12px 10px; /* ปรับ padding */
+            padding: 12px 8px;
             text-align: left;
             border-bottom: 1px solid #eee;
-            word-wrap: break-word; /* อนุญาตให้คำยาวขึ้นบรรทัดใหม่ */
+            word-wrap: break-word;
         }
         
         th {
@@ -226,16 +221,7 @@
             color: #333;
         }
         
-        /* Login Section */
-        .login-container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        
+        /* Form Styles */
         .form-group {
             margin-bottom: 20px;
         }
@@ -246,33 +232,161 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #4361ee;
+            outline: none;
+        }
+        
+        /* Score Controls */
+        .score-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .score-input {
+            flex: 1;
+        }
+        
+        /* Login Section */
+        .login-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        /* Tab Styles */
+        .tab-container {
+            margin-top: 20px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .tab-btn {
+            padding: 10px 15px;
+            background: #eee;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px 5px 0 0;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: #3a0ca3;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 0 5px 5px 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* GitHub-like Accordion */
+        .accordion {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .accordion-header {
+            background-color: #f6f8fa;
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .accordion-header:hover {
+            background-color: #eaeef2;
+        }
+        
+        .accordion-content {
+            padding: 15px;
+            background: white;
+        }
+        
+        .accordion-icon {
+            transition: transform 0.3s;
+        }
+        
+        .accordion.active .accordion-icon {
+            transform: rotate(90deg);
+        }
+        
+        /* Request Status */
+        .status-pending {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        
+        .status-approved {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        
+        .status-rejected {
+            color: #e74c3c;
+            font-weight: bold;
         }
         
         /* Responsive Styles */
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.8rem;
-                padding-top: 20px;
             }
             
-            .panel-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
             .btn {
                 padding: 8px 12px;
                 font-size: 0.85rem;
-                margin: 2px;
+                min-width: 70px;
             }
             
-            table {
-                font-size: 0.9rem;
+            .btn-group {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .score-controls {
+                flex-direction: column;
             }
             
             th, td {
                 padding: 8px 5px;
+                font-size: 0.9rem;
             }
+        }
+        
+        /* Custom Styles */
+        .positive { color: #2ecc71; font-weight: bold; }
+        .negative { color: #e74c3c; font-weight: bold; }
+        .log-entry {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -297,7 +411,7 @@
                 <label for="password"><strong>รหัสผ่าน</strong></label>
                 <input type="password" id="password" class="form-control" placeholder="กรอกรหัสผ่าน">
             </div>
-            <button class="btn" onclick="login()" style="width: 100%;">เข้าสู่ระบบ</button>
+            <button class="btn btn-login" id="loginBtn" onclick="login()" style="width: 100%;">เข้าสู่ระบบ</button>
         </div>
 
         <!-- Student Panel -->
@@ -311,7 +425,7 @@
                 <thead>
                     <tr>
                         <th style="width: 20%;">วันที่</th>
-                        <th style="width: 40%;">รา��การ</th>
+                        <th style="width: 40%;">รายการ</th>
                         <th style="width: 20%;">คะแนนที่เปลี่ยนแปลง</th>
                         <th style="width: 20%;">โดย</th>
                     </tr>
@@ -327,22 +441,38 @@
             <div class="panel-header">
                 <h2 class="panel-title">จัดการคะแนนนักเรียน</h2>
                 <div>
-                    <button class="btn btn-add" onclick="openAddScoreModal()"><i class="fas fa-plus"></i> เพิ่ม/ลดคะแนน</button>
                     <button class="btn btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</button>
                 </div>
             </div>
-            <table id="teacherStudentTable">
-                <thead>
-                    <tr>
-                        <th style="width: 20%;">รหัสนักเรียน</th>
-                        <th style="width: 40%;">ชื่อนักเรียน</th>
-                        <th style="width: 20%;">คะแนนรวม</th>
-                        <th style="width: 20%;">การดำเนินการ</th>
-                    </tr>
-                </thead>
-                <tbody id="teacherStudentBody">
-                </tbody>
-            </table>
+            
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="openTeacherTab('teacherStudents')">นักเรียน</button>
+                    <button class="tab-btn" onclick="openTeacherTab('teacherPendingRequests')">คำขอที่รอการอนุมัติ</button>
+                </div>
+                
+                <div id="teacherStudents" class="tab-content active">
+                    <table id="teacherStudentTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">รหัสนักเรียน</th>
+                                <th style="width: 30%;">ชื่อนักเรียน</th>
+                                <th style="width: 15%;">ระดับชั้น</th>
+                                <th style="width: 15%;">คะแนนรวม</th>
+                                <th style="width: 25%;">การดำเนินการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teacherStudentBody">
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="teacherPendingRequests" class="tab-content">
+                    <div id="teacherRequestsContainer">
+                        <!-- คำขอลด/เพิ่มคะแนนที่รออนุมัติจะแสดงที่นี่ -->
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Admin Panel -->
@@ -359,6 +489,7 @@
                 <div class="tab-buttons">
                     <button class="tab-btn active" onclick="openTab('adminStudents')">นักเรียน</button>
                     <button class="tab-btn" onclick="openTab('adminTeachers')">ครู</button>
+                    <button class="tab-btn" onclick="openTab('adminPendingRequests')">คำขอที่รออนุมัติ</button>
                     <button class="tab-btn" onclick="openTab('adminLogs')">ประวัติการเปลี่ยนแปลง</button>
                 </div>
                 
@@ -366,43 +497,14 @@
                     <table id="adminStudentTable">
                         <thead>
                             <tr>
-                                <th style="width: 20%;">รหัสนักเรียน</th>
-                                <th style="width: 40%;">ชื่อนักเรียน</th>
-                                <th style="width: 20%;">คะแนนรวม</th>
-                                <th style="width: 20%;">การดำเนินการ</th>
+                                <th style="width: 15%;">รหัสนักเรียน</th>
+                                <th style="width: 30%;">ชื่อนักเรียน</th>
+                                <th style="width: 15%;">ระดับชั้น</th>
+                                <th style="width: 15%;">คะแนนรวม</th>
+                                <th style="width: 25%;">การดำเนินการ</th>
                             </tr>
                         </thead>
                         <tbody id="adminStudentBody">
-                            <tr>
-                                <td>64001</td>
-                                <td>นักเรียน หนึ่ง</td>
-                                <td>-410</td>
-                                <td><button class="btn btn-edit" onclick="editUser('64001')"><i class="fas fa-edit"></i> แก้ไข</button></td>
-                            </tr>
-                            <tr>
-                                <td>64002</td>
-                                <td>นักเรียน สอง</td>
-                                <td>77</td>
-                                <td><button class="btn btn-edit" onclick="editUser('64002')"><i class="fas fa-edit"></i> แก้ไข</button></td>
-                            </tr>
-                            <tr>
-                                <td>64003</td>
-                                <td>นักเรียน สาม</td>
-                                <td>90</td>
-                                <td><button class="btn btn-edit" onclick="editUser('64003')"><i class="fas fa-edit"></i> แก้ไข</button></td>
-                            </tr>
-                            <tr>
-                                <td>64004</td>
-                                <td>นักเรียน สี่</td>
-                                <td>68</td>
-                                <td><button class="btn btn-edit" onclick="editUser('64004')"><i class="fas fa-edit"></i> แก้ไข</button></td>
-                            </tr>
-                            <tr>
-                                <td>64005</td>
-                                <td>นักเรียน ห้า</td>
-                                <td>77</td>
-                                <td><button class="btn btn-edit" onclick="editUser('64005')"><i class="fas fa-edit"></i> แก้ไข</button></td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -417,18 +519,14 @@
                             </tr>
                         </thead>
                         <tbody id="adminTeacherBody">
-                            <tr>
-                                <td>t001</td>
-                                <td>ครู สมชาย</td>
-                                <td><button class="btn btn-edit" onclick="editUser('t001')"><i class="fas fa-edit"></i> แก้ไข</button></td>
-                            </tr>
-                            <tr>
-                                <td>t002</td>
-                                <td>ครู สมหญิง</td>
-                                <td><button class="btn btn-edit" onclick="editUser('t002')"><i class="fas fa-edit"></i> แก้ไข</button></td>
-                            </tr>
                         </tbody>
                     </table>
+                </div>
+                
+                <div id="adminPendingRequests" class="tab-content">
+                    <div id="adminRequestsContainer">
+                        <!-- คำขอลด/เพิ่มคะแนนที่รออนุมัติจะแสดงที่นี่ -->
+                    </div>
                 </div>
                 
                 <div id="adminLogs" class="tab-content">
@@ -451,14 +549,29 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="scoreChange">จำนวนคะแนน (บวก=เพิ่ม, ลบ=ลด)</label>
-                    <input type="number" id="scoreChange" class="form-control" placeholder="เช่น 5 หรือ -3">
+                    <label for="scoreClass">ระดับชั้น</label>
+                    <select id="scoreClass" class="form-control">
+                        <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
+                        <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
+                        <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
+                        <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
+                        <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
+                        <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>จำนวนคะแนน</label>
+                    <div class="score-controls">
+                        <button class="btn btn-increase" onclick="setScoreValue(1)"><i class="fas fa-plus"></i> เพิ่ม</button>
+                        <button class="btn btn-decrease" onclick="setScoreValue(-1)"><i class="fas fa-minus"></i> ลด</button>
+                        <input type="number" id="scoreChange" class="form-control score-input" placeholder="เช่น 5 หรือ -3" value="1">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="scoreReason">เหตุผล</label>
                     <input type="text" id="scoreReason" class="form-control" placeholder="เช่น มาโรงเรียนสาย, ช่วยเหลือเพื่อน">
                 </div>
-                <button class="btn" onclick="submitScoreChange()"><i class="fas fa-save"></i> บันทึก</button>
+                <button class="btn" onclick="submitScoreRequest()"><i class="fas fa-paper-plane"></i> ส่งคำขอ</button>
             </div>
         </div>
 
@@ -483,6 +596,17 @@
                     <label for="newUserName">ชื่อ-สกุล</label>
                     <input type="text" id="newUserName" class="form-control" placeholder="ชื่อผู้ใช้">
                 </div>
+                <div class="form-group" id="newUserClassGroup">
+                    <label for="newUserClass">ระดับชั้น (สำหรับนักเรียน)</label>
+                    <select id="newUserClass" class="form-control">
+                        <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
+                        <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
+                        <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
+                        <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
+                        <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
+                        <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label for="newUserPassword">รหัสผ่าน</label>
                     <input type="password" id="newUserPassword" class="form-control" placeholder="รหัสผ่าน">
@@ -504,6 +628,17 @@
                     <label for="editUserName">ชื่อ-สกุล</label>
                     <input type="text" id="editUserName" class="form-control">
                 </div>
+                <div class="form-group" id="editUserClassGroup">
+                    <label for="editUserClass">ระดับชั้น</label>
+                    <select id="editUserClass" class="form-control">
+                        <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
+                        <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
+                        <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
+                        <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
+                        <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
+                        <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label for="editUserPassword">รหัสผ่านใหม่ (เว้นว่างหากไม่ต้องการเปลี่ยน)</label>
                     <input type="password" id="editUserPassword" class="form-control">
@@ -511,6 +646,23 @@
                 <div style="display: flex; justify-content: space-between; margin-top: 20px;">
                     <button class="btn btn-edit" onclick="updateUser()"><i class="fas fa-save"></i> บันทึกการเปลี่ยนแปลง</button>
                     <button class="btn btn-remove" onclick="deleteUser()"><i class="fas fa-trash"></i> ลบผู้ใช้นี้</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request Approval Modal -->
+        <div id="approvalModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('approvalModal')">&times;</span>
+                <h2 style="margin-bottom: 20px;">อนุมัติคำขอเปลี่ยนแปลงคะแนน</h2>
+                <div id="requestDetails"></div>
+                <div class="form-group">
+                    <label for="approvalComment">ความคิดเห็น (ไม่จำเป็น)</label>
+                    <textarea id="approvalComment" class="form-control" rows="3" placeholder="เพิ่มความคิดเห็น..."></textarea>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <button class="btn btn-approve" onclick="approveRequest(true)"><i class="fas fa-check"></i> อนุมัติ</button>
+                    <button class="btn btn-reject" onclick="approveRequest(false)"><i class="fas fa-times"></i> ไม่อนุมัติ</button>
                 </div>
             </div>
         </div>
@@ -523,36 +675,37 @@
         // ข้อมูลเริ่มต้น
         const defaultData = {
             users: [
-                { id: "64001", name: "นักเรียน หนึ่ง", password: "64001", role: "student", score: -410, logs: [
-                    { date: "2023-05-01T09:00:00", change: 5, by: "ครู สมชาย", reason: "ช่วยเหลือเพื่อน" },
-                    { date: "2023-05-03T10:30:00", change: -2, by: "ครู สมหญิง", reason: "ส่งงานช้า" },
-                    { date: "2023-05-05T08:15:00", change: -413, by: "ครู สมชาย", reason: "ขาดเรียนหลายครั้ง" }
+                { id: "64001", name: "นักเรียน หนึ่ง", password: "64001", role: "student", class: "ม.1", score: -410, logs: [
+                    { date: "2023-05-01T09:00:00", change: 5, by: "ครู สมชาย", reason: "ช่วยเหลือเพื่อน", status: "approved" },
+                    { date: "2023-05-03T10:30:00", change: -2, by: "ครู สมหญิง", reason: "ส่งงานช้า", status: "approved" },
+                    { date: "2023-05-05T08:15:00", change: -413, by: "ครู สมชาย", reason: "ขาดเรียนหลายครั้ง", status: "approved" }
                 ]},
-                { id: "64002", name: "นักเรียน สอง", password: "64002", role: "student", score: 77, logs: [
-                    { date: "2023-05-02T08:45:00", change: -5, by: "ครู สมหญิง", reason: "มาโรงเรียนสาย" },
-                    { date: "2023-05-04T14:15:00", change: 2, by: "ครู สมชาย", reason: "ตอบคำถามในชั้นเรียน" },
-                    { date: "2023-05-06T09:30:00", change: 80, by: "ครู สมหญิง", reason: "ชนะการแข่งขันวิชาการ" }
+                { id: "64002", name: "นักเรียน สอง", password: "64002", role: "student", class: "ม.2", score: 77, logs: [
+                    { date: "2023-05-02T08:45:00", change: -5, by: "ครู สมหญิง", reason: "มาโรงเรียนสาย", status: "approved" },
+                    { date: "2023-05-04T14:15:00", change: 2, by: "ครู สมชาย", reason: "ตอบคำถามในชั้นเรียน", status: "approved" },
+                    { date: "2023-05-06T09:30:00", change: 80, by: "ครู สมหญิง", reason: "ชนะการแข่งขันวิชาการ", status: "approved" }
                 ]},
-                { id: "64003", name: "นักเรียน สาม", password: "64003", role: "student", score: 90, logs: [
-                    { date: "2023-05-01T11:20:00", change: 3, by: "ครู สมชาย", reason: "ทำงานกลุ่มดี" },
-                    { date: "2023-05-06T13:10:00", change: 4, by: "ครู สมหญิง", reason: "ช่วยครูยกของ" },
-                    { date: "2023-05-08T10:00:00", change: -7, by: "ครู สมชาย", reason: "ไม่ส่งงาน" }
+                { id: "64003", name: "นักเรียน สาม", password: "64003", role: "student", class: "ม.3", score: 90, logs: [
+                    { date: "2023-05-01T11:20:00", change: 3, by: "ครู สมชาย", reason: "ทำงานกลุ่มดี", status: "approved" },
+                    { date: "2023-05-06T13:10:00", change: 4, by: "ครู สมห��ิง", reason: "ช่วยครูยกของ", status: "approved" },
+                    { date: "2023-05-08T10:00:00", change: -7, by: "ครู สมชาย", reason: "ไม่ส่งงาน", status: "approved" }
                 ]},
-                { id: "64004", name: "นักเรียน สี่", password: "64004", role: "student", score: 68, logs: [
-                    { date: "2023-05-03T10:00:00", change: -3, by: "ครู สมชาย", reason: "ไม่ทำการบ้าน" },
-                    { date: "2023-05-07T09:30:00", change: -2, by: "ครู สมหญิง", reason: "พูดคุยในชั้นเรียน" },
-                    { date: "2023-05-09T14:00:00", change: 73, by: "ครู สมหญิง", reason: "พัฒนาการดีขึ้น" }
+                { id: "64004", name: "นักเรียน สี่", password: "64004", role: "student", class: "ม.4", score: 68, logs: [
+                    { date: "2023-05-03T10:00:00", change: -3, by: "ครู สมชาย", reason: "ไม่ทำการบ้าน", status: "approved" },
+                    { date: "2023-05-07T09:30:00", change: -2, by: "ครู สมหญิง", reason: "พูดคุยในชั้นเรียน", status: "approved" },
+                    { date: "2023-05-09T14:00:00", change: 73, by: "ครู สมหญิง", reason: "พัฒนาการดีขึ้น", status: "approved" }
                 ]},
-                { id: "64005", name: "นักเรียน ห้า", password: "64005", role: "student", score: 77, logs: [
-                    { date: "2023-05-02T15:00:00", change: 5, by: "ครู สมหญิง", reason: "ชนะการแข่งขัน" },
-                    { date: "2023-05-05T08:20:00", change: -1, by: "ครู สมชาย", reason: "ลืมอุปกรณ์" },
-                    { date: "2023-05-07T11:45:00", change: 73, by: "ครู สมชาย", reason: "มีน้ำใจช่วยเหลือเพื่อน" }
+                { id: "64005", name: "นักเรียน ห้า", password: "64005", role: "student", class: "ม.5", score: 77, logs: [
+                    { date: "2023-05-02T15:00:00", change: 5, by: "ครู สมหญิง", reason: "ชนะการแข่งขัน", status: "approved" },
+                    { date: "2023-05-05T08:20:00", change: -1, by: "ครู สมชาย", reason: "ลืมอุปกรณ์", status: "approved" },
+                    { date: "2023-05-07T11:45:00", change: 73, by: "ครู สมชาย", reason: "มีน้ำใจช่วยเหลือเพื่อน", status: "approved" }
                 ]},
                 { id: "t001", name: "ครู สมชาย", password: "t001", role: "teacher" },
                 { id: "t002", name: "ครู สมหญิง", password: "t002", role: "teacher" },
                 { id: "admin", name: "ผู้บริหาร ใหญ่", password: "admin", role: "admin" }
             ],
-            allLogs: []
+            allLogs: [],
+            pendingRequests: []
         };
 
         // โหลดข้อมูลจาก localStorage
@@ -581,10 +734,12 @@
                             date: log.date,
                             studentId: user.id,
                             studentName: user.name,
+                            studentClass: user.class,
                             change: log.change,
                             by: log.by,
                             reason: log.reason,
-                            actionBy: log.by.split(' ')[1] // แยกรหัสครูจากชื่อ
+                            actionBy: log.by.split(' ')[1], // แยกรหัสครูจากชื่อ
+                            status: log.status
                         });
                     });
                 }
@@ -595,36 +750,49 @@
         // ตัวแปรระบบ
         let users = [];
         let allLogs = [];
+        let pendingRequests = [];
         let currentUser = null;
+        let selectedRequestId = null;
 
         // โหลดข้อมูลเมื่อเริ่มต้น
         function initializeSystem() {
             const data = loadData();
             users = data.users;
             allLogs = data.allLogs;
+            pendingRequests = data.pendingRequests || [];
         }
 
         // เข้าสู่ระบบ
         function login() {
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน!');
+                return;
+            }
+            
+            // กระพริบปุ่มเมื่อคลิก
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.classList.add('active');
+            setTimeout(() => loginBtn.classList.remove('active'), 500);
             
             currentUser = users.find(user => user.id === username && user.password === password);
             
             if (currentUser) {
                 document.getElementById('loginSection').style.display = 'none';
                 
-                switch(currentUser.role) {
-                    case 'student':
-                        showStudentPanel();
-                        break;
-                    case 'teacher':
-                        showTeacherPanel();
-                        break;
-                    case 'admin':
-                        showAdminPanel();
-                        break;
-                }
+                // บันทึกเวลาการเข้าสู่ระบบ
+                currentUser.lastLogin = new Date().toISOString();
+                saveData({ users, allLogs, pendingRequests });
+                
+                // เรียกฟังก์ชันแสดงแผงตามบทบาท
+                const panels = {
+                    'student': showStudentPanel,
+                    'teacher': showTeacherPanel,
+                    'admin': showAdminPanel
+                };
+                panels[currentUser.role]();
             } else {
                 alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!');
             }
@@ -649,6 +817,7 @@
             document.getElementById('studentInfo').innerHTML = `
                 <p><strong>รหัสนักเรียน:</strong> ${currentUser.id}</p>
                 <p><strong>ชื่อนักเรียน:</strong> ${currentUser.name}</p>
+                ${currentUser.class ? `<p><strong>ระดับชั้น:</strong> ${currentUser.class}</p>` : ''}
             `;
             
             const tbody = document.getElementById('studentScoreBody');
@@ -683,6 +852,37 @@
             const panel = document.getElementById('teacherPanel');
             panel.style.display = 'block';
             
+            // แสดงแท็บนักเรียน
+            openTeacherTab('teacherStudents');
+        }
+
+        // เปิดแท็บครู
+        function openTeacherTab(tabName) {
+            // ซ่อนแท็บทั้งหมด
+            document.querySelectorAll('#teacherPanel .tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // ยกเลิกการเลือกปุ่มแท็บทั้งหมด
+            document.querySelectorAll('#teacherPanel .tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // แสดงแท็บที่เลือก
+            document.getElementById(tabName).classList.add('active');
+            
+            // เน้นปุ่มแท็บที่เลือก
+            event.currentTarget.classList.add('active');
+            
+            if (tabName === 'teacherStudents') {
+                loadTeacherStudents();
+            } else if (tabName === 'teacherPendingRequests') {
+                loadTeacherPendingRequests();
+            }
+        }
+
+        // โหลดข้อมูลนักเรียนสำหรับครู
+        function loadTeacherStudents() {
             const tbody = document.getElementById('teacherStudentBody');
             tbody.innerHTML = '';
             
@@ -692,14 +892,64 @@
                 row.innerHTML = `
                     <td>${student.id}</td>
                     <td>${student.name}</td>
+                    <td>${student.class || '-'}</td>
                     <td class="${student.score > 0 ? 'positive' : 'negative'}">${student.score}</td>
                     <td>
-                        <button class="btn btn-add" onclick="openAddScoreModal('${student.id}')">
-                            <i class="fas fa-edit"></i> จัดการคะแนน
-                        </button>
+                        <div class="btn-group">
+                            <button class="btn btn-increase" onclick="openAddScoreModal('${student.id}', true)">
+                                <i class="fas fa-plus"></i> เพิ่ม
+                            </button>
+                            <button class="btn btn-decrease" onclick="openAddScoreModal('${student.id}', false)">
+                                <i class="fas fa-minus"></i> ลด
+                            </button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(row);
+            });
+        }
+
+        // โหลดคำขอที่รออนุมัติสำหรับครู
+        function loadTeacherPendingRequests() {
+            const container = document.getElementById('teacherRequestsContainer');
+            container.innerHTML = '';
+            
+            const teacherRequests = pendingRequests.filter(
+                req => req.requestedBy === currentUser.id
+            );
+            
+            if (teacherRequests.length === 0) {
+                container.innerHTML = '<p>ไม่มีคำขอที่รอการอนุมัติ</p>';
+                return;
+            }
+            
+            teacherRequests.forEach(request => {
+                const accordion = document.createElement('div');
+                accordion.className = 'accordion';
+                accordion.innerHTML = `
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>
+                            <strong>${request.studentName} (${request.studentId})</strong> - 
+                            ${request.change > 0 ? '+' : ''}${request.change} คะแนน
+                            <span class="status-pending">(รออนุมัติ)</span>
+                        </span>
+                        <i class="fas fa-chevron-right accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <p><strong>เหตุผล:</strong> ${request.reason}</p>
+                        <p><strong>วันที่ส่งคำขอ:</strong> ${formatDate(request.requestDate)}</p>
+                        <p><strong>ระดับชั้น:</strong> ${request.studentClass}</p>
+                        <div class="btn-group" style="margin-top: 10px;">
+                            <button class="btn btn-edit" onclick="editRequest('${request.id}')">
+                                <i class="fas fa-edit"></i> แก้ไข
+                            </button>
+                            <button class="btn btn-remove" onclick="cancelRequest('${request.id}')">
+                                <i class="fas fa-trash"></i> ยกเลิก
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(accordion);
             });
         }
 
@@ -708,9 +958,43 @@
             const panel = document.getElementById('adminPanel');
             panel.style.display = 'block';
             
-            // แท็บนักเรียน
-            const studentTbody = document.getElementById('adminStudentBody');
-            studentTbody.innerHTML = '';
+            // แสดงแท็บนักเรียน
+            openTab('adminStudents');
+        }
+
+        // เปิดแท็บ
+        function openTab(tabName) {
+            // ซ่อนแท็บทั้งหมด
+            document.querySelectorAll('#adminPanel .tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // ยกเลิกการเลือกปุ่มแท็บทั้งหมด
+            document.querySelectorAll('#adminPanel .tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // แสดงแท็บที่เลือก
+            document.getElementById(tabName).classList.add('active');
+            
+            // เน้นปุ่มแท็บที่เลือก
+            event.currentTarget.classList.add('active');
+            
+            if (tabName === 'adminStudents') {
+                loadAdminStudents();
+            } else if (tabName === 'adminTeachers') {
+                loadAdminTeachers();
+            } else if (tabName === 'adminPendingRequests') {
+                loadAdminPendingRequests();
+            } else if (tabName === 'adminLogs') {
+                loadAdminLogs();
+            }
+        }
+
+        // โหลดข้อมูลนักเรียนสำหรับผู้ดูแล
+        function loadAdminStudents() {
+            const tbody = document.getElementById('adminStudentBody');
+            tbody.innerHTML = '';
             
             const students = users.filter(user => user.role === 'student');
             students.forEach(student => {
@@ -718,6 +1002,7 @@
                 row.innerHTML = `
                     <td>${student.id}</td>
                     <td>${student.name}</td>
+                    <td>${student.class || '-'}</td>
                     <td class="${student.score > 0 ? 'positive' : 'negative'}">${student.score}</td>
                     <td>
                         <button class="btn btn-edit" onclick="editUser('${student.id}')">
@@ -725,12 +1010,14 @@
                         </button>
                     </td>
                 `;
-                studentTbody.appendChild(row);
+                tbody.appendChild(row);
             });
-            
-            // แท็บครู
-            const teacherTbody = document.getElementById('adminTeacherBody');
-            teacherTbody.innerHTML = '';
+        }
+
+        // โหลดข้อมูลครูสำหรับผู้ดูแล
+        function loadAdminTeachers() {
+            const tbody = document.getElementById('adminTeacherBody');
+            tbody.innerHTML = '';
             
             const teachers = users.filter(user => user.role === 'teacher');
             teachers.forEach(teacher => {
@@ -744,10 +1031,50 @@
                         </button>
                     </td>
                 `;
-                teacherTbody.appendChild(row);
+                tbody.appendChild(row);
             });
+        }
+
+        // โหลดคำขอที่รออนุมัติสำหรับผู้ดูแล
+        function loadAdminPendingRequests() {
+            const container = document.getElementById('adminRequestsContainer');
+            container.innerHTML = '';
             
-            // แท็บประวัติ
+            if (pendingRequests.length === 0) {
+                container.innerHTML = '<p>ไม่มีคำขอที่รอการอนุมัติ</p>';
+                return;
+            }
+            
+            pendingRequests.forEach(request => {
+                const accordion = document.createElement('div');
+                accordion.className = 'accordion';
+                accordion.innerHTML = `
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>
+                            <strong>${request.studentName} (${request.studentId})</strong> - 
+                            ${request.change > 0 ? '+' : ''}${request.change} คะแนน
+                            <span class="status-pending">(รออนุมัติ)</span>
+                        </span>
+                        <i class="fas fa-chevron-right accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <p><strong>ครูผู้ขอ:</strong> ${request.teacherName}</p>
+                        <p><strong>เหตุผล:</strong> ${request.reason}</p>
+                        <p><strong>วันที่ส่งคำขอ:</strong> ${formatDate(request.requestDate)}</p>
+                        <p><strong>ระดับชั้น:</strong> ${request.studentClass}</p>
+                        <div class="btn-group" style="margin-top: 10px;">
+                            <button class="btn btn-approve" onclick="openApprovalModal('${request.id}')">
+                                <i class="fas fa-check"></i> อนุมัติ
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(accordion);
+            });
+        }
+
+        // โหลดประวัติการเปลี่ยนแปลง
+        function loadAdminLogs() {
             const logsContainer = document.getElementById('adminLogsContainer');
             logsContainer.innerHTML = '';
             
@@ -758,7 +1085,7 @@
                     logEntry.className = 'log-entry';
                     logEntry.innerHTML = `
                         <p><strong>${formatDate(log.date)}</strong></p>
-                        <p>นักเรียน: ${log.studentName} (${log.studentId})</p>
+                        <p>นักเรียน: ${log.studentName} (${log.studentId}) ${log.studentClass ? 'ชั้น ' + log.studentClass : ''}</p>
                         <p>คะแนนที่เปลี่ยนแปลง: 
                             <span class="${log.change > 0 ? 'positive' : 'negative'}">
                                 ${log.change > 0 ? '+' : ''}${log.change}
@@ -766,6 +1093,10 @@
                         </p>
                         <p>เหตุผล: ${log.reason}</p>
                         <p>โดย: ${log.by}</p>
+                        <p>สถานะ: <span class="status-${log.status || 'approved'}">${
+                            log.status === 'approved' ? 'อนุมัติ' : 
+                            log.status === 'rejected' ? 'ไม่อนุมัติ' : 'เสร็จสิ้น'
+                        }</span></p>
                         <hr style="margin: 10px 0; border-color: #eee;">
                     `;
                     logsContainer.appendChild(logEntry);
@@ -776,7 +1107,7 @@
         }
 
         // เปิดโมดอลเพิ่ม/ลดคะแนน
-        function openAddScoreModal(studentId = null) {
+        function openAddScoreModal(studentId = null, isIncrease = true) {
             const modal = document.getElementById('addScoreModal');
             const select = document.getElementById('scoreStudentId');
             select.innerHTML = '';
@@ -785,86 +1116,218 @@
             students.forEach(student => {
                 const option = document.createElement('option');
                 option.value = student.id;
-                option.textContent = `${student.name} (${student.id})`;
+                option.textContent = `${student.name} (${student.id}) ${student.class ? 'ชั้น ' + student.class : ''}`;
                 if (studentId && student.id === studentId) {
                     option.selected = true;
+                    // ตั้งค่าระดับชั้นตามนักเรียนที่เลือก
+                    document.getElementById('scoreClass').value = student.class || 'ม.1';
                 }
                 select.appendChild(option);
             });
             
-            document.getElementById('scoreChange').value = '';
+            // ตั้งค่าค่าเริ่มต้นตามการเพิ่มหรือลดคะแนน
+            document.getElementById('scoreChange').value = isIncrease ? '1' : '-1';
             document.getElementById('scoreReason').value = '';
             modal.style.display = 'flex';
         }
 
-        // ส่งการเปลี่ยนแปลงคะแนน
-        function submitScoreChange() {
+        // ตั้งค่าค่าคะแนน
+        function setScoreValue(value) {
+            const scoreInput = document.getElementById('scoreChange');
+            const currentValue = parseInt(scoreInput.value) || 0;
+            
+            // ตรวจสอบว่าไม่ให้เป็น 0 หรือติดลบเมื่อกดเพิ่ม
+            if (value > 0) {
+                scoreInput.value = Math.max(1, currentValue + value);
+            } else {
+                scoreInput.value = Math.min(-1, currentValue + value);
+            }
+        }
+
+        // ส่งคำขอเปลี่ยนแปลงคะแนน
+        function submitScoreRequest() {
             const studentId = document.getElementById('scoreStudentId').value;
             const change = parseInt(document.getElementById('scoreChange').value);
-            const reason = document.getElementById('scoreReason').value;
+            const reason = document.getElementById('scoreReason').value.trim();
+            const studentClass = document.getElementById('scoreClass').value;
             
-            if (!studentId || isNaN(change) || !reason) {
-                alert('กรุณากรอกข้อมูลให้ครบถ้วน!');
+            if (!studentId) {
+                alert('กรุณาเลือกนักเรียน!');
+                return;
+            }
+            
+            if (isNaN(change)) {
+                alert('กรุณากรอกจำนวนคะแนนเป็นตัวเลข!');
+                return;
+            }
+            
+            if (!reason || reason.length < 5) {
+                alert('กรุณากรอกเหตุผลอย่างน้อย 5 ตัวอักษร!');
                 return;
             }
             
             const student = users.find(user => user.id === studentId && user.role === 'student');
             if (student) {
-                student.score += change;
-                
-                const today = new Date().toISOString();
-                const logEntry = {
-                    date: today,
-                    change: change,
-                    by: currentUser.name,
-                    reason: reason
-                };
-                
-                if (!student.logs) student.logs = [];
-                student.logs.push(logEntry);
-                
-                // เพิ่มในประวัติทั้งหมด
-                allLogs.push({
-                    date: today,
+                // สร้างคำขอใหม่
+                const requestId = 'req-' + Date.now();
+                const newRequest = {
+                    id: requestId,
                     studentId: student.id,
                     studentName: student.name,
+                    studentClass: student.class,
                     change: change,
-                    by: currentUser.name,
                     reason: reason,
-                    actionBy: currentUser.id
-                });
+                    teacherName: currentUser.name,
+                    requestedBy: currentUser.id,
+                    requestDate: new Date().toISOString(),
+                    status: 'pending'
+                };
                 
-                saveData({ users, allLogs });
+                pendingRequests.push(newRequest);
+                saveData({ users, allLogs, pendingRequests });
                 closeModal('addScoreModal');
+                
+                // แสดงข้อความสำเร็จ
+                alert('ส่งคำขอเปลี่ยนแปลงคะแนนเรียบร้อย รอการอนุมัติจากผู้บริหาร');
                 
                 // รีเฟรชแผงปัจจุบัน
                 if (currentUser.role === 'teacher') {
                     showTeacherPanel();
-                } else if (currentUser.role === 'admin') {
-                    showAdminPanel();
                 }
-                
-                alert('บันทึกการเปลี่ยนแปลงคะแนนเรียบร้อย!');
             }
         }
 
-        // เปิดแท็บ
-        function openTab(tabName) {
-            // ซ่อนแท็บทั้งหมด
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
+        // เปิดโมดอลอนุมัติคำขอ
+        function openApprovalModal(requestId) {
+            selectedRequestId = requestId;
+            const request = pendingRequests.find(req => req.id === requestId);
+            if (!request) return;
             
-            // ยกเลิกการเลือกปุ่มแท็บทั้งหมด
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.getElementById('requestDetails').innerHTML = `
+                <p><strong>นักเรียน:</strong> ${request.studentName} (${request.studentId})</p>
+                <p><strong>ระดับชั้น:</strong> ${request.studentClass}</p>
+                <p><strong>ครูผู้ขอ:</strong> ${request.teacherName}</p>
+                <p><strong>คะแนนที่เปลี่ยนแปลง:</strong> 
+                    <span class="${request.change > 0 ? 'positive' : 'negative'}">
+                        ${request.change > 0 ? '+' : ''}${request.change}
+                    </span>
+                </p>
+                <p><strong>เหตุผล:</strong> ${request.reason}</p>
+                <p><strong>วันที่ส่งคำขอ:</strong> ${formatDate(request.requestDate)}</p>
+            `;
             
-            // แสดงแท็บที่เลือก
-            document.getElementById(tabName).classList.add('active');
+            document.getElementById('approvalComment').value = '';
+            document.getElementById('approvalModal').style.display = 'flex';
+        }
+
+        // อนุมัติหรือปฏิเสธคำขอ
+        function approveRequest(isApproved) {
+            const requestIndex = pendingRequests.findIndex(req => req.id === selectedRequestId);
+            if (requestIndex === -1) return;
             
-            // เน้นปุ่มแท็บที่เลือก
-            event.currentTarget.classList.add('active');
+            const request = pendingRequests[requestIndex];
+            const comment = document.getElementById('approvalComment').value.trim();
+            
+            if (isApproved) {
+                // หานักเรียนและอัปเดตคะแนน
+                const student = users.find(user => user.id === request.studentId && user.role === 'student');
+                if (student) {
+                    student.score += request.change;
+                    
+                    // บันทึกประวัติ
+                    const logEntry = {
+                        date: new Date().toISOString(),
+                        change: request.change,
+                        by: request.teacherName,
+                        reason: request.reason,
+                        status: 'approved'
+                    };
+                    
+                    if (!student.logs) student.logs = [];
+                    student.logs.push(logEntry);
+                    
+                    // เพิ่มในประวัติทั้งหมด
+                    allLogs.push({
+                        date: logEntry.date,
+                        studentId: student.id,
+                        studentName: student.name,
+                        studentClass: student.class,
+                        change: request.change,
+                        by: request.teacherName,
+                        reason: request.reason,
+                        actionBy: currentUser.id,
+                        status: 'approved',
+                        comment: comment
+                    });
+                }
+            } else {
+                // เพิ่มในประวัติการปฏิเสธ
+                allLogs.push({
+                    date: new Date().toISOString(),
+                    studentId: request.studentId,
+                    studentName: request.studentName,
+                    studentClass: request.studentClass,
+                    change: request.change,
+                    by: request.teacherName,
+                    reason: request.reason,
+                    actionBy: currentUser.id,
+                    status: 'rejected',
+                    comment: comment
+                });
+            }
+            
+            // ลบคำขอออกจากรายการรออนุมัติ
+            pendingRequests.splice(requestIndex, 1);
+            
+            saveData({ users, allLogs, pendingRequests });
+            closeModal('approvalModal');
+            
+            // รีเฟรชแผง
+            if (currentUser.role === 'admin') {
+                loadAdminPendingRequests();
+                loadAdminLogs();
+            }
+            
+            alert(`คำขอได้รับการ${isApproved ? 'อนุมัติ' : 'ปฏิเสธ'}เรียบร้อย`);
+        }
+
+        // แก้ไขคำขอ
+        function editRequest(requestId) {
+            const request = pendingRequests.find(req => req.id === requestId);
+            if (!request) return;
+            
+            // เปิดโมดอลแก้ไขคำขอ
+            openAddScoreModal(request.studentId, request.change > 0);
+            
+            // ตั้งค่าข้อมูลเดิม
+            document.getElementById('scoreChange').value = request.change;
+            document.getElementById('scoreReason').value = request.reason;
+            
+            // ลบคำขอเดิม
+            pendingRequests = pendingRequests.filter(req => req.id !== requestId);
+        }
+
+        // ยกเลิกคำขอ
+        function cancelRequest(requestId) {
+            if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกคำขอนี้?')) return;
+            
+            pendingRequests = pendingRequests.filter(req => req.id !== requestId);
+            saveData({ users, allLogs, pendingRequests });
+            
+            // รีเฟรชแผง
+            if (currentUser.role === 'teacher') {
+                loadTeacherPendingRequests();
+            } else if (currentUser.role === 'admin') {
+                loadAdminPendingRequests();
+            }
+            
+            alert('ยกเลิกคำขอเรียบร้อยแล้ว');
+        }
+
+        // เปิด/ปิด Accordion
+        function toggleAccordion(header) {
+            const accordion = header.parentElement;
+            accordion.classList.toggle('active');
         }
 
         // เปิดโมดอลเพิ่มผู้ใช้
@@ -872,6 +1335,7 @@
             document.getElementById('newUserType').value = 'student';
             document.getElementById('newUserId').value = '';
             document.getElementById('newUserName').value = '';
+            document.getElementById('newUserClass').value = 'ม.1';
             document.getElementById('newUserPassword').value = '';
             document.getElementById('addUserModal').style.display = 'flex';
         }
@@ -879,9 +1343,10 @@
         // เพิ่มผู้ใช้ใหม่
         function addNewUser() {
             const userType = document.getElementById('newUserType').value;
-            const userId = document.getElementById('newUserId').value;
-            const userName = document.getElementById('newUserName').value;
+            const userId = document.getElementById('newUserId').value.trim();
+            const userName = document.getElementById('newUserName').value.trim();
             const password = document.getElementById('newUserPassword').value;
+            const userClass = document.getElementById('newUserClass').value;
             
             if (!userId || !userName || !password) {
                 alert('กรุณากรอกข้อมูลให้ครบถ้วน!');
@@ -903,10 +1368,11 @@
             if (userType === 'student') {
                 newUser.score = 80;
                 newUser.logs = [];
+                newUser.class = userClass;
             }
             
             users.push(newUser);
-            saveData({ users, allLogs });
+            saveData({ users, allLogs, pendingRequests });
             
             closeModal('addUserModal');
             showAdminPanel();
@@ -922,14 +1388,24 @@
             document.getElementById('editUserName').value = user.name;
             document.getElementById('editUserPassword').value = '';
             
+            // ซ่อน/แสดงส่วนระดับชั้นสำหรับนักเรียน
+            const classGroup = document.getElementById('editUserClassGroup');
+            if (user.role === 'student') {
+                classGroup.style.display = 'block';
+                document.getElementById('editUserClass').value = user.class || 'ม.1';
+            } else {
+                classGroup.style.display = 'none';
+            }
+            
             document.getElementById('editUserModal').style.display = 'flex';
         }
 
         // อัปเดตผู้ใช้
         function updateUser() {
             const userId = document.getElementById('editUserId').value;
-            const userName = document.getElementById('editUserName').value;
+            const userName = document.getElementById('editUserName').value.trim();
             const password = document.getElementById('editUserPassword').value;
+            const userClass = document.getElementById('editUserClass').value;
             
             const user = users.find(u => u.id === userId);
             if (user) {
@@ -938,7 +1414,11 @@
                     user.password = password;
                 }
                 
-                saveData({ users, allLogs });
+                if (user.role === 'student') {
+                    user.class = userClass;
+                }
+                
+                saveData({ users, allLogs, pendingRequests });
                 closeModal('editUserModal');
                 showAdminPanel();
                 alert('บันทึกการเปลี่ยนแปลงเรียบร้อย!');
@@ -959,7 +1439,10 @@
                 allLogs = allLogs.filter(log => log.actionBy !== userId);
             }
             
-            saveData({ users, allLogs });
+            // ลบคำขอที่เกี่ยวข้อง
+            pendingRequests = pendingRequests.filter(req => req.requestedBy !== userId && req.studentId !== userId);
+            
+            saveData({ users, allLogs, pendingRequests });
             closeModal('editUserModal');
             showAdminPanel();
             alert('ลบผู้ใช้เรียบร้อย!');
@@ -985,22 +1468,7 @@
         // เริ่มต้นระบบเมื่อโหลดหน้า
         window.onload = function() {
             initializeSystem();
-            
-            // เพิ่มสไตล์สำหรับข้อความคะแนน
-            const style = document.createElement('style');
-            style.textContent = `
-                .positive { color: #2ecc71; font-weight: bold; }
-                .negative { color: #e74c3c; font-weight: bold; }
-                .log-entry {
-                    background: white;
-                    padding: 15px;
-                    margin-bottom: 10px;
-                    border-radius: 5px;
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                }
-            `;
-            document.head.appendChild(style);
         };
     </script>
 </body>
-</html>
+    </html>
