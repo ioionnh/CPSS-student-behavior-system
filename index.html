@@ -114,6 +114,10 @@
             background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         }
 
+        .btn-change-password {
+            background: linear-gradient(135deg, #7209b7 0%, #560bad 100%);
+        }
+
         /* เพิ่มสไตล์สำหรับกลุ่มปุ่ม */
         .btn-group {
             display: flex;
@@ -182,6 +186,16 @@
         
         tr:hover {
             background-color: #f8f9fa;
+        }
+
+        /* สไตล์สำหรับแถวหัวข้อชั้นเรียน */
+        tr.class-header {
+            background-color: #f6f8fa;
+        }
+        
+        tr.class-header td {
+            font-weight: bold;
+            padding: 10px 8px;
         }
         
         /* Modal Styles */
@@ -452,6 +466,18 @@
                 </div>
                 
                 <div id="teacherStudents" class="tab-content active">
+                    <div class="form-group">
+                        <label for="teacherClassFilter">กรองตามชั้นเรียน:</label>
+                        <select id="teacherClassFilter" class="form-control" onchange="loadTeacherStudents()">
+                            <option value="">ทั้งหมด</option>
+                            <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
+                            <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
+                            <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
+                            <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
+                            <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
+                            <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
+                        </select>
+                    </div>
                     <table id="teacherStudentTable">
                         <thead>
                             <tr>
@@ -481,6 +507,7 @@
                 <h2 class="panel-title">ระบบจัดการผู้ดูแล</h2>
                 <div>
                     <button class="btn btn-add" onclick="openAddUserModal()"><i class="fas fa-user-plus"></i> เพิ่มผู้ใช้</button>
+                    <button class="btn btn-change-password" onclick="openChangePasswordModal()"><i class="fas fa-key"></i> เปลี่ยนรหัสผ่าน</button>
                     <button class="btn btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</button>
                 </div>
             </div>
@@ -494,6 +521,18 @@
                 </div>
                 
                 <div id="adminStudents" class="tab-content active">
+                    <div class="form-group">
+                        <label for="adminClassFilter">กรองตามชั้นเรียน:</label>
+                        <select id="adminClassFilter" class="form-control" onchange="loadAdminStudents()">
+                            <option value="">ทั้งหมด</option>
+                            <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
+                            <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
+                            <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
+                            <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
+                            <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
+                            <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
+                        </select>
+                    </div>
                     <table id="adminStudentTable">
                         <thead>
                             <tr>
@@ -582,7 +621,7 @@
                 <h2 style="margin-bottom: 20px;">เพิ่มผู้ใช้ใหม่</h2>
                 <div class="form-group">
                     <label for="newUserType">ประเภทผู้ใช้</label>
-                    <select id="newUserType" class="form-control">
+                    <select id="newUserType" class="form-control" onchange="toggleClassField()">
                         <option value="student">นักเรียน</option>
                         <option value="teacher">ครู</option>
                         <option value="admin">ผู้บริหาร</option>
@@ -666,43 +705,52 @@
                 </div>
             </div>
         </div>
+
+        <!-- Change Password Modal -->
+        <div id="changePasswordModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('changePasswordModal')">&times;</span>
+                <h2 style="margin-bottom: 20px;">เปลี่ยนรหัสผ่านผู้บริหาร</h2>
+                <div class="form-group">
+                    <label for="adminSecurityCode">รหัสยืนยัน</label>
+                    <input type="password" id="adminSecurityCode" class="form-control" placeholder="กรอกรหัสยืนยัน">
+                </div>
+                <div class="form-group">
+                    <label for="newAdminPassword">รหัสผ่านใหม่</label>
+                    <input type="password" id="newAdminPassword" class="form-control" placeholder="รหัสผ่านใหม่">
+                </div>
+                <div class="form-group">
+                    <label for="confirmAdminPassword">ยืนยันรหัสผ่านใหม่</label>
+                    <input type="password" id="confirmAdminPassword" class="form-control" placeholder="ยืนยันรหัสผ่านใหม่">
+                </div>
+                <button class="btn" onclick="changeAdminPassword()"><i class="fas fa-key"></i> เปลี่ยนรหัสผ่าน</button>
+            </div>
+        </div>
     </div>
 
     <script>
         // ระบบเก็บข้อมูลแบบถาวร
         const STORAGE_KEY = 'studentBehaviorSystemData';
+        const ADMIN_SECURITY_CODE = '065391'; // รหัสยืนยันสำหรับเปลี่ยนรหัสผ่านผู้บริหาร
         
         // ข้อมูลเริ่มต้น
         const defaultData = {
             users: [
-                { id: "64001", name: "นักเรียน หนึ่ง", password: "64001", role: "student", class: "ม.1", score: -410, logs: [
-                    { date: "2023-05-01T09:00:00", change: 5, by: "ครู สมชาย", reason: "ช่วยเหลือเพื่อน", status: "approved" },
-                    { date: "2023-05-03T10:30:00", change: -2, by: "ครู สมหญิง", reason: "ส่งงานช้า", status: "approved" },
-                    { date: "2023-05-05T08:15:00", change: -413, by: "ครู สมชาย", reason: "ขาดเรียนหลายครั้ง", status: "approved" }
-                ]},
-                { id: "64002", name: "นักเรียน สอง", password: "64002", role: "student", class: "ม.2", score: 77, logs: [
-                    { date: "2023-05-02T08:45:00", change: -5, by: "ครู สมหญิง", reason: "มาโรงเรียนสาย", status: "approved" },
-                    { date: "2023-05-04T14:15:00", change: 2, by: "ครู สมชาย", reason: "ตอบคำถามในชั้นเรียน", status: "approved" },
-                    { date: "2023-05-06T09:30:00", change: 80, by: "ครู สมหญิง", reason: "ชนะการแข่งขันวิชาการ", status: "approved" }
-                ]},
-                { id: "64003", name: "นักเรียน สาม", password: "64003", role: "student", class: "ม.3", score: 90, logs: [
-                    { date: "2023-05-01T11:20:00", change: 3, by: "ครู สมชาย", reason: "ทำงานกลุ่มดี", status: "approved" },
-                    { date: "2023-05-06T13:10:00", change: 4, by: "ครู สมห��ิง", reason: "ช่วยครูยกของ", status: "approved" },
-                    { date: "2023-05-08T10:00:00", change: -7, by: "ครู สมชาย", reason: "ไม่ส่งงาน", status: "approved" }
-                ]},
-                { id: "64004", name: "นักเรียน สี่", password: "64004", role: "student", class: "ม.4", score: 68, logs: [
-                    { date: "2023-05-03T10:00:00", change: -3, by: "ครู สมชาย", reason: "ไม่ทำการบ้าน", status: "approved" },
-                    { date: "2023-05-07T09:30:00", change: -2, by: "ครู สมหญิง", reason: "พูดคุยในชั้นเรียน", status: "approved" },
-                    { date: "2023-05-09T14:00:00", change: 73, by: "ครู สมหญิง", reason: "พัฒนาการดีขึ้น", status: "approved" }
-                ]},
-                { id: "64005", name: "นักเรียน ห้า", password: "64005", role: "student", class: "ม.5", score: 77, logs: [
-                    { date: "2023-05-02T15:00:00", change: 5, by: "ครู สมหญิง", reason: "ชนะการแข่งขัน", status: "approved" },
-                    { date: "2023-05-05T08:20:00", change: -1, by: "ครู สมชาย", reason: "ลืมอุปกรณ์", status: "approved" },
-                    { date: "2023-05-07T11:45:00", change: 73, by: "ครู สมชาย", reason: "มีน้ำใจช่วยเหลือเพื่อน", status: "approved" }
-                ]},
+                { id: "64001", name: "นักเรียน หนึ่ง", password: "64001", role: "student", class: "ม.1/1", score: 80, logs: [] },
+                { id: "64002", name: "นักเรียน สอง", password: "64002", role: "student", class: "ม.1/2", score: 77, logs: [] },
+                { id: "64003", name: "นักเรียน สาม", password: "64003", role: "student", class: "ม.2/1", score: 90, logs: [] },
+                { id: "64004", name: "นักเรียน สี่", password: "64004", role: "student", class: "ม.2/2", score: 68, logs: [] },
+                { id: "64005", name: "นักเรียน ห้า", password: "64005", role: "student", class: "ม.3/1", score: 77, logs: [] },
+                { id: "64006", name: "นักเรียน หก", password: "64006", role: "student", class: "ม.3/2", score: 85, logs: [] },
+                { id: "64007", name: "นักเรียน เจ็ด", password: "64007", role: "student", class: "ม.4/1", score: 92, logs: [] },
+                { id: "64008", name: "นักเรียน แปด", password: "64008", role: "student", class: "ม.4/2", score: 65, logs: [] },
+                { id: "64009", name: "นักเรียน เก้า", password: "64009", role: "student", class: "ม.5/1", score: 78, logs: [] },
+                { id: "64010", name: "นักเรียน สิบ", password: "64010", role: "student", class: "ม.5/2", score: 88, logs: [] },
+                { id: "64011", name: "นักเรียน สิบเอ็ด", password: "64011", role: "student", class: "ม.6/1", score: 95, logs: [] },
+                { id: "64012", name: "นักเรียน สิบสอง", password: "64012", role: "student", class: "ม.6/2", score: 70, logs: [] },
                 { id: "t001", name: "ครู สมชาย", password: "t001", role: "teacher" },
-                { id: "t003", name: "ครู สมหญิง", password: "t002", role: "teacher" },
-                { id: "Nueng", name: "ผู้บริหาร", password: "Nueng1", role: "admin" }
+                { id: "t002", name: "ครู สมหญิง", password: "t002", role: "teacher" },
+                { id: "admin", name: "ผู้บริหาร ใหญ่", password: "admin", role: "admin" }
             ],
             allLogs: [],
             pendingRequests: []
@@ -713,7 +761,7 @@
             const savedData = localStorage.getItem(STORAGE_KEY);
             if (!savedData) {
                 // สร้างข้อมูลเริ่มต้นและบันทึก
-                initializeSampleLogs();
+                saveData(defaultData);
                 return defaultData;
             }
             return JSON.parse(savedData);
@@ -722,29 +770,6 @@
         // บันทึกข้อมูล
         function saveData(data) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        }
-
-        // เริ่มต้นข้อมูลตัวอย่าง
-        function initializeSampleLogs() {
-            defaultData.allLogs = [];
-            defaultData.users.forEach(user => {
-                if (user.role === 'student' && user.logs) {
-                    user.logs.forEach(log => {
-                        defaultData.allLogs.push({
-                            date: log.date,
-                            studentId: user.id,
-                            studentName: user.name,
-                            studentClass: user.class,
-                            change: log.change,
-                            by: log.by,
-                            reason: log.reason,
-                            actionBy: log.by.split(' ')[1], // แยกรหัสครูจากชื่อ
-                            status: log.status
-                        });
-                    });
-                }
-            });
-            saveData(defaultData);
         }
 
         // ตัวแปรระบบ
@@ -886,26 +911,52 @@
             const tbody = document.getElementById('teacherStudentBody');
             tbody.innerHTML = '';
             
-            const students = users.filter(user => user.role === 'student');
+            const classFilter = document.getElementById('teacherClassFilter').value;
+            let students = users.filter(user => user.role === 'student');
+            
+            if (classFilter) {
+                students = students.filter(student => student.class.startsWith(classFilter));
+            }
+            
+            // จัดกลุ่มนักเรียนตามชั้นเรียน
+            const classGroups = {};
             students.forEach(student => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${student.id}</td>
-                    <td>${student.name}</td>
-                    <td>${student.class || '-'}</td>
-                    <td class="${student.score > 0 ? 'positive' : 'negative'}">${student.score}</td>
-                    <td>
-                        <div class="btn-group">
-                            <button class="btn btn-increase" onclick="openAddScoreModal('${student.id}', true)">
-                                <i class="fas fa-plus"></i> เพิ่ม
-                            </button>
-                            <button class="btn btn-decrease" onclick="openAddScoreModal('${student.id}', false)">
-                                <i class="fas fa-minus"></i> ลด
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
+                const mainClass = student.class.split('/')[0]; // เช่น ม.1 จาก ม.1/1
+                if (!classGroups[mainClass]) {
+                    classGroups[mainClass] = [];
+                }
+                classGroups[mainClass].push(student);
+            });
+            
+            // แสดงนักเรียนตามกลุ่มชั้นเรียน
+            Object.keys(classGroups).sort().forEach(mainClass => {
+                // เพิ่มหัวข้อชั้นเรียนหลัก
+                const headerRow = document.createElement('tr');
+                headerRow.className = 'class-header';
+                headerRow.innerHTML = `<td colspan="5">${mainClass}</td>`;
+                tbody.appendChild(headerRow);
+                
+                // แสดงนักเรียนแต่ละคนในชั้นเรียน
+                classGroups[mainClass].forEach(student => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${student.id}</td>
+                        <td>${student.name}</td>
+                        <td>${student.class || '-'}</td>
+                        <td class="${student.score > 0 ? 'positive' : 'negative'}">${student.score}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-increase" onclick="openAddScoreModal('${student.id}', true)">
+                                    <i class="fas fa-plus"></i> เพิ่ม
+                                </button>
+                                <button class="btn btn-decrease" onclick="openAddScoreModal('${student.id}', false)">
+                                    <i class="fas fa-minus"></i> ลด
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
             });
         }
 
@@ -996,21 +1047,47 @@
             const tbody = document.getElementById('adminStudentBody');
             tbody.innerHTML = '';
             
-            const students = users.filter(user => user.role === 'student');
+            const classFilter = document.getElementById('adminClassFilter').value;
+            let students = users.filter(user => user.role === 'student');
+            
+            if (classFilter) {
+                students = students.filter(student => student.class.startsWith(classFilter));
+            }
+            
+            // จัดกลุ่มนักเรียนตามชั้นเรียน
+            const classGroups = {};
             students.forEach(student => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${student.id}</td>
-                    <td>${student.name}</td>
-                    <td>${student.class || '-'}</td>
-                    <td class="${student.score > 0 ? 'positive' : 'negative'}">${student.score}</td>
-                    <td>
-                        <button class="btn btn-edit" onclick="editUser('${student.id}')">
-                            <i class="fas fa-edit"></i> แก้ไข
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
+                const mainClass = student.class.split('/')[0]; // เช่น ม.1 จาก ม.1/1
+                if (!classGroups[mainClass]) {
+                    classGroups[mainClass] = [];
+                }
+                classGroups[mainClass].push(student);
+            });
+            
+            // แสดงนักเรียนตามกลุ่มชั้นเรียน
+            Object.keys(classGroups).sort().forEach(mainClass => {
+                // เพิ่มหัวข้อชั้นเรียนหลัก
+                const headerRow = document.createElement('tr');
+                headerRow.className = 'class-header';
+                headerRow.innerHTML = `<td colspan="5">${mainClass}</td>`;
+                tbody.appendChild(headerRow);
+                
+                // แสดงนักเรียนแต่ละคนในชั้นเรียน
+                classGroups[mainClass].forEach(student => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${student.id}</td>
+                        <td>${student.name}</td>
+                        <td>${student.class || '-'}</td>
+                        <td class="${student.score > 0 ? 'positive' : 'negative'}">${student.score}</td>
+                        <td>
+                            <button class="btn btn-edit" onclick="editUser('${student.id}')">
+                                <i class="fas fa-edit"></i> แก้ไข
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
             });
         }
 
@@ -1120,7 +1197,7 @@
                 if (studentId && student.id === studentId) {
                     option.selected = true;
                     // ตั้งค่าระดับชั้นตามนักเรียนที่เลือก
-                    document.getElementById('scoreClass').value = student.class || 'ม.1';
+                    document.getElementById('scoreClass').value = student.class ? student.class.split('/')[0] : 'ม.1';
                 }
                 select.appendChild(option);
             });
@@ -1337,7 +1414,20 @@
             document.getElementById('newUserName').value = '';
             document.getElementById('newUserClass').value = 'ม.1';
             document.getElementById('newUserPassword').value = '';
+            toggleClassField();
             document.getElementById('addUserModal').style.display = 'flex';
+        }
+
+        // ซ่อน/แสดงฟิลด์ชั้นเรียนตามประเภทผู้ใช้
+        function toggleClassField() {
+            const userType = document.getElementById('newUserType').value;
+            const classGroup = document.getElementById('newUserClassGroup');
+            
+            if (userType === 'student') {
+                classGroup.style.display = 'block';
+            } else {
+                classGroup.style.display = 'none';
+            }
         }
 
         // เพิ่มผู้ใช้ใหม่
@@ -1346,7 +1436,18 @@
             const userId = document.getElementById('newUserId').value.trim();
             const userName = document.getElementById('newUserName').value.trim();
             const password = document.getElementById('newUserPassword').value;
-            const userClass = document.getElementById('newUserClass').value;
+            let userClass = '';
+            
+            if (userType === 'student') {
+                userClass = document.getElementById('newUserClass').value;
+                const subClass = prompt("กรอกห้องเรียนย่อย (เช่น 1 สำหรับ ม.1/1):");
+                if (subClass) {
+                    userClass = `${userClass}/${subClass}`;
+                } else {
+                    alert('กรุณากรอกห้องเรียนย่อย!');
+                    return;
+                }
+            }
             
             if (!userId || !userName || !password) {
                 alert('กรุณากรอกข้อมูลให้ครบถ้วน!');
@@ -1379,6 +1480,45 @@
             alert('เพิ่มผู้ใช้ใหม่เรียบร้อย!');
         }
 
+        // เปิดโมดอลเปลี่ยนรหัสผ่านผู้บริหาร
+        function openChangePasswordModal() {
+            document.getElementById('adminSecurityCode').value = '';
+            document.getElementById('newAdminPassword').value = '';
+            document.getElementById('confirmAdminPassword').value = '';
+            document.getElementById('changePasswordModal').style.display = 'flex';
+        }
+
+        // เปลี่ยนรหัสผ่านผู้บริหาร
+        function changeAdminPassword() {
+            const securityCode = document.getElementById('adminSecurityCode').value;
+            const newPassword = document.getElementById('newAdminPassword').value;
+            const confirmPassword = document.getElementById('confirmAdminPassword').value;
+
+            if (securityCode !== ADMIN_SECURITY_CODE) {
+                alert('รหัสยืนยันไม่ถูกต้อง!');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert('รหัสผ่านใหม่และยืนยันรหัสผ่านไม่ตรงกัน!');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                alert('รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร!');
+                return;
+            }
+
+            // อัปเดตรหัสผ่านผู้บริหาร
+            const admin = users.find(u => u.id === 'admin');
+            if (admin) {
+                admin.password = newPassword;
+                saveData({ users, allLogs, pendingRequests });
+                closeModal('changePasswordModal');
+                alert('เปลี่ยนรหัสผ่านเรียบร้อยแล้ว!');
+            }
+        }
+
         // แก้ไขผู้ใช้
         function editUser(userId) {
             const user = users.find(u => u.id === userId);
@@ -1392,7 +1532,7 @@
             const classGroup = document.getElementById('editUserClassGroup');
             if (user.role === 'student') {
                 classGroup.style.display = 'block';
-                document.getElementById('editUserClass').value = user.class || 'ม.1';
+                document.getElementById('editUserClass').value = user.class ? user.class.split('/')[0] : 'ม.1';
             } else {
                 classGroup.style.display = 'none';
             }
@@ -1415,7 +1555,10 @@
                 }
                 
                 if (user.role === 'student') {
-                    user.class = userClass;
+                    // รักษาห้องเรียนย่อยเดิมหากมี
+                    const currentClass = user.class || '';
+                    const subClass = currentClass.split('/')[1] || '1';
+                    user.class = `${userClass}/${subClass}`;
                 }
                 
                 saveData({ users, allLogs, pendingRequests });
