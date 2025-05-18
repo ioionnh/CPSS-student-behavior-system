@@ -4,547 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>โรงเรียนชุมแพศึกษา - ระบบบันทึกคะแนนพฤติกรรม</title>
-    <link rel="icon" type="image/png" href="https://drive.google.com/file/d/1Eq1Bm5LuMkp6dIS9FRQSmpWhpsTz3Eqf/view?usp=drivesdk">
-    <style>
-        /* Reset และ Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Kanit', sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
-            min-height: 100vh;
-            color: #e0e0e0;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px 15px;
-            width: 100%;
-            background: #2c2c2c;
-        }
-        
-        /* Sidebar Styles */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: -250px; /* ซ่อน sidebar เริ่มต้น */
-            width: 250px;
-            height: 100%;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b0764 100%);
-            color: white;
-            transition: left 0.3s ease;
-            z-index: 1000;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-        }
-
-        .sidebar.active {
-            left: 0; /* แสดง sidebar */
-        }
-
-        .sidebar-header {
-            display: flex;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .sidebar-header .school-logo {
-            width: 50px;
-            height: 50px;
-            margin-right: 10px;
-            border-radius: 50%;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            object-fit: contain;
-            background-color: #fff;
-        }
-
-        .sidebar-header h2 {
-            font-size: 1.2rem;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-        }
-
-        .sidebar-menu li {
-            padding: 15px 20px;
-        }
-
-        .sidebar-menu li a {
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: background 0.3s;
-        }
-
-        .sidebar-menu li a:hover {
-            background: rgba(255,255,255,0.1);
-            border-radius: 5px;
-        }
-
-        /* Main Content */
-        .main-content {
-            margin-left: 0;
-            transition: margin-left 0.3s ease;
-        }
-
-        .main-content.active {
-            margin-left: 250px; /* ขยับเนื้อหาเมื่อ sidebar เปิด */
-        }
-
-        /* Top Header Styles */
-        .top-header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b0764 100%);
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            position: sticky;
-            top: 0;
-            z-index: 900;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .menu-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .header-left .school-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            object-fit: contain;
-            background-color: #fff;
-        }
-
-        .header-left h1 {
-            font-size: 1.5rem;
-        }
-
-        .header-right {
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* ปุ่ม Styles */
-        .btn {
-            display: inline-block;
-            color: white;
-            border: none;
-            padding: 6px 10px; /* ลดขนาด padding */
-            border-radius: 8px;
-            font-size: 0.8rem; /* ลดขนาดตัวอักษร */
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-decoration: none;
-            margin: 2px;
-            white-space: nowrap;
-            text-align: center;
-            max-width: 80px; /* จำกัดความกว้างปุ่ม */
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
-        }
-        
-        .btn-login {
-            background: linear-gradient(135deg, #4cc9f0 0%, #4895ef 100%);
-        }
-        
-        .btn-login.active {
-            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-            animation: pulse 0.5s;
-        }
-        
-        .btn-logout {
-            background: linear-gradient(135deg, #f72585 0%, #b5179e 100%);
-        }
-        
-        .btn-add {
-            background: linear-gradient(135deg, #4cc9f0 0%, #4895ef 100%);
-        }
-        
-        .btn-remove {
-            background: linear-gradient(135deg, #f72585 0%, #7209b7 100%);
-        }
-        
-        .btn-edit {
-            background: linear-gradient(135deg, #f8961e 0%, #f3722c 100%);
-        }
-
-        .btn-increase {
-            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-        }
-        
-        .btn-decrease {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-        }
-
-        .btn-approve {
-            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-        }
-        
-        .btn-reject {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-        }
-
-        .btn-change-password {
-            background: linear-gradient(135deg, #7209b7 0%, #560bad 100%);
-        }
-
-        /* เพิ่มสไตล์สำหรับกลุ่มปุ่ม */
-        .btn-group {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-            justify-content: center; /* จัดปุ่มให้อยู่กึ่งกลาง */
-        }
-        
-        /* Panel Styles */
-        .panel {
-            display: none;
-            background: #333;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            margin-bottom: 30px;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #444;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .panel-title {
-            font-size: 1.5rem;
-            color: #a78bfa;
-        }
-        
-        /* Table Styles */
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            table-layout: auto;
-            background: #2c2c2c;
-        }
-        
-        th, td {
-            padding: 12px 8px;
-            text-align: left;
-            border-bottom: 1px solid #444;
-            word-wrap: break-word;
-            color: #e0e0e0;
-        }
-        
-        th {
-            background: #1e3a8a;
-            color: #e0e0e0;
-            font-weight: 500;
-        }
-        
-        tr:hover {
-            background-color: #3a3a3a;
-        }
-
-        /* ปรับคอลัมน์การดำเนินการ */
-        th:nth-child(5), td:nth-child(5) {
-            text-align: center;
-            min-width: 150px;
-        }
-
-        /* สไตล์สำหรับแถวหัวข้อชั้นเรียน */
-        tr.class-header {
-            background-color: #3a3a3a;
-        }
-        
-        tr.class-header td {
-            font-weight: bold;
-            padding: 10px 8px;
-            color: #e0e0e0;
-        }
-        
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-content {
-            background: #333;
-            padding: 25px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            position: relative;
-            color: #e0e0e0;
-        }
-        
-        .close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 1.5rem;
-            color: #aaa;
-            cursor: pointer;
-        }
-        
-        .close:hover {
-            color: #fff;
-        }
-        
-        /* Form Styles */
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #555;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-            background: #444;
-            color: #e0e0e0;
-        }
-        
-        .form-control:focus {
-            border-color: #a78bfa;
-            outline: none;
-        }
-        
-        /* Score Controls */
-        .score-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .score-input {
-            flex: 1;
-        }
-        
-        /* Login Section */
-        .login-container {
-            background: #333;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        
-        /* Tab Styles */
-        .tab-container {
-            margin-top: 20px;
-        }
-        
-        .tab-buttons {
-            display: flex;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-        
-        .tab-btn {
-            padding: 10px 15px;
-            background: #444;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 5px 5px 0 0;
-            transition: all 0.3s;
-            color: #e0e0e0;
-        }
-        
-        .tab-btn.active {
-            background: #1e3a8a;
-            color: #ffffff;
-        }
-        
-        .tab-content {
-            display: none;
-            padding: 20px;
-            background: #333;
-            border-radius: 0 5px 5px 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* GitHub-like Accordion */
-        .accordion {
-            border: 1px solid #555;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            overflow: hidden;
-        }
-        
-        .accordion-header {
-            background-color: #3a3a3a;
-            padding: 10px 15px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #555;
-            color: #e0e0e0;
-        }
-        
-        .accordion-header:hover {
-            background-color: #444;
-        }
-        
-        .accordion-content {
-            padding: 15px;
-            background: #333;
-            color: #e0e0e0;
-        }
-        
-        .accordion-icon {
-            transition: transform 0.3s;
-        }
-        
-        .accordion.active .accordion-icon {
-            transform: rotate(90deg);
-        }
-        
-        /* Request Status */
-        .status-pending {
-            color: #f39c12;
-            font-weight: bold;
-        }
-        
-        .status-approved {
-            color: #2ecc71;
-            font-weight: bold;
-        }
-        
-        .status-rejected {
-            color: #e74c3c;
-            font-weight: bold;
-        }
-        
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-                left: -200px;
-            }
-            
-            .main-content.active {
-                margin-left: 200px;
-            }
-            
-            .top-header h1 {
-                font-size: 1.2rem;
-            }
-            
-            .header-right {
-                font-size: 0.9rem;
-            }
-            
-            .btn {
-                padding: 5px 8px;
-                font-size: 0.7rem;
-                max-width: 70px;
-            }
-            
-            .btn-group {
-                flex-direction: column;
-                gap: 5px;
-            }
-            
-            .score-controls {
-                flex-direction: column;
-            }
-            
-            th, td {
-                padding: 8px 5px;
-                font-size: 0.9rem;
-            }
-            
-            th:nth-child(5), td:nth-child(5) {
-                min-width: 120px;
-            }
-        }
-        
-        /* Custom Styles */
-        .positive { color: #2ecc71; font-weight: bold; }
-        .negative { color: #e74c3c; font-weight: bold; }
-        .log-entry {
-            background: #333;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            color: #e0e0e0;
-        }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="https://cdn.discordapp.com/attachments/790080660735787008/1360262389613723830/-150x150-1.png?ex=67fa7a92&is=67f92912&hm=a29e840c68e99d91aabb3128c72d567fe966cc0bef866e9a0b30ad8e6cde909f&">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
 </head>
 <body>
     <div class="sidebar" id="sidebar">
@@ -565,7 +32,7 @@
     <div class="main-content">
         <header class="top-header">
             <div class="header-left">
-                <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()" style="display: none;"><i class="fas fa-bars"></i></button>
                 <img src="https://cdn.discordapp.com/attachments/790080660735787008/1360262389613723830/-150x150-1.png?ex=67fa7a92&is=67f92912&hm=a29e840c68e99d91aabb3128c72d567fe966cc0bef866e9a0b30ad8e6cde909f&" alt="School Logo" class="school-logo">
                 <h1>โรงเรียนชุมแพศึกษา</h1>
             </div>
@@ -575,14 +42,14 @@
                     <button class="btn btn-add" onclick="openAddUserModal()"><i class="fas fa-user-plus"></i> เพิ่ม</button>
                     <button class="btn btn-change-password" onclick="openChangePasswordModal()"><i class="fas fa-key"></i> แก้ไขรหัสผ่าน</button>
                 </div>
-                <button class="btn btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</button>
+                <button class="btn btn-logout" id="logoutBtn" onclick="logout()" style="display: none;"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</button>
             </div>
         </header>
 
         <div class="container">
             <!-- Login Section -->
             <div class="login-container" id="loginSection">
-                <h2 style="text-align: center; margin-bottom: 20px;">เข้าสู่ระบบ</h2>
+                <h2>เข้าสู่ระบบ</h2>
                 <div class="form-group">
                     <label for="username"><strong>ชื่อผู้ใช้</strong></label>
                     <input type="text" id="username" class="form-control" placeholder="กรอกรหัสผู้ใช้">
@@ -591,7 +58,7 @@
                     <label for="password"><strong>รหัสผ่าน</strong></label>
                     <input type="password" id="password" class="form-control" placeholder="กรอกรหัสผ่าน">
                 </div>
-                <button class="btn btn-login" id="loginBtn" onclick="login()" style="width: 100%;">เข้าสู่ระบบ</button>
+                <button class="btn btn-login" id="loginBtn" onclick="login()">เข้าสู่ระบบ</button>
             </div>
 
             <!-- Student Panel -->
@@ -604,14 +71,13 @@
                     <table id="studentScoreTable">
                         <thead>
                             <tr>
-                                <th style="width: 20%;">วันที่</th>
-                                <th style="width: 40%;">รายการ</th>
-                                <th style="width: 20%;">คะแนนที่เปลี่ยนแปลง</th>
-                                <th style="width: 20%;">โดย</th>
+                                <th>วันที่</th>
+                                <th>รายการ</th>
+                                <th>คะแนนที่เปลี่ยนแปลง</th>
+                                <th>โดย</th>
                             </tr>
                         </thead>
-                        <tbody id="studentScoreBody">
-                        </tbody>
+                        <tbody id="studentScoreBody"></tbody>
                     </table>
                 </div>
                 <div id="studentTotalScore" style="text-align: center; margin-top: 20px;"></div>
@@ -622,7 +88,6 @@
                 <div class="panel-header">
                     <h2 class="panel-title">จัดการคะแนนนักเรียน</h2>
                 </div>
-
                 <div class="accordion">
                     <div class="accordion-header" onclick="toggleAccordion(this)">
                         <span>นักเรียน</span>
@@ -649,41 +114,34 @@
                             <table id="teacherStudentTable">
                                 <thead>
                                     <tr>
-                                        <th style="width: 15%;">รหัสนักเรียน</th>
-                                        <th style="width: 25%;">ชื่อนักเรียน</th>
-                                        <th style="width: 15%;">ระดับชั้น</th>
-                                        <th style="width: 15%;">คะแนนรวม</th>
-                                        <th style="width: 30%;">การดำเนินการ</th>
+                                        <th>รหัสนักเรียน</th>
+                                        <th>ชื่อนักเรียน</th>
+                                        <th>ระดับชั้น</th>
+                                        <th>คะแนนรวม</th>
+                                        <th>การดำเนินการ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="teacherStudentBody">
-                                </tbody>
+                                <tbody id="teacherStudentBody"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-
                 <div class="accordion">
                     <div class="accordion-header" onclick="toggleAccordion(this)">
                         <span>คำขอที่รอการอนุมัติ</span>
                         <i class="fas fa-chevron-right accordion-icon"></i>
                     </div>
                     <div class="accordion-content">
-                        <div id="teacherRequestsContainer">
-                            <!-- คำขอลด/เพิ่มคะแนนที่รออนุมัติจะแสดงที่นี่ -->
-                        </div>
+                        <div id="teacherRequestsContainer"></div>
                     </div>
                 </div>
-
                 <div class="accordion">
                     <div class="accordion-header" onclick="toggleAccordion(this)">
                         <span>ข้อความแจ้งเตือน</span>
                         <i class="fas fa-chevron-right accordion-icon"></i>
                     </div>
                     <div class="accordion-content">
-                        <div id="teacherNotificationsContainer">
-                            <!-- การแจ้งเตือนจะแสดงที่นี่ -->
-                        </div>
+                        <div id="teacherNotificationsContainer"></div>
                     </div>
                 </div>
             </div>
@@ -693,7 +151,6 @@
                 <div class="panel-header">
                     <h2 class="panel-title">ระบบจัดการผู้ดูแล</h2>
                 </div>
-                
                 <div class="tab-container">
                     <div class="tab-buttons">
                         <button class="tab-btn active" onclick="openTab('adminStudents')">นักเรียน</button>
@@ -701,7 +158,6 @@
                         <button class="tab-btn" onclick="openTab('adminPendingRequests')">คำขอที่รออนุมัติ</button>
                         <button class="tab-btn" onclick="openTab('adminLogs')">ประวัติการเปลี่ยนแปลง</button>
                     </div>
-                    
                     <div id="adminStudents" class="tab-content active">
                         <div class="form-group">
                             <label for="adminClassFilter">กรองตามชั้นเรียน:</label>
@@ -723,59 +179,48 @@
                             <table id="adminStudentTable">
                                 <thead>
                                     <tr>
-                                        <th style="width: 15%;">รหัสนักเรียน</th>
-                                        <th style="width: 25%;">ชื่อนักเรียน</th>
-                                        <th style="width: 15%;">ระดับชั้น</th>
-                                        <th style="width: 15%;">คะแนนรวม</th>
-                                        <th style="width: 30%;">การดำเนินการ</th>
+                                        <th>รหัสนักเรียน</th>
+                                        <th>ชื่อนักเรียน</th>
+                                        <th>ระดับชั้น</th>
+                                        <th>คะแนนรวม</th>
+                                        <th>การดำเนินการ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="adminStudentBody">
-                                </tbody>
+                                <tbody id="adminStudentBody"></tbody>
                             </table>
                         </div>
                     </div>
-                    
                     <div id="adminTeachers" class="tab-content">
                         <div class="table-container">
                             <table id="adminTeacherTable">
                                 <thead>
                                     <tr>
-                                        <th style="width: 30%;">รหัสครู</th>
-                                        <th style="width: 40%;">ชื่อครู</th>
-                                        <th style="width: 30%;">การดำเนินการ</th>
+                                        <th>รหัสครู</th>
+                                        <th>ชื่อครู</th>
+                                        <th>การดำเนินการ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="adminTeacherBody">
-                                </tbody>
+                                <tbody id="adminTeacherBody"></tbody>
                             </table>
                         </div>
                     </div>
-                    
                     <div id="adminPendingRequests" class="tab-content">
-                        <div id="adminRequestsContainer">
-                            <!-- คำขอลด/เพิ่มคะแนนที่รออนุมัติจะแสดงที่นี่ -->
-                        </div>
+                        <div id="adminRequestsContainer"></div>
                     </div>
-                    
                     <div id="adminLogs" class="tab-content">
-                        <div id="adminLogsContainer" style="max-height: 500px; overflow-y: auto;">
-                            <!-- Log entries will be added here -->
-                        </div>
+                        <div id="adminLogsContainer" style="max-height: 500px; overflow-y: auto;"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Add Score Modal -->
+            <!-- Modals -->
             <div id="addScoreModal" class="modal">
                 <div class="modal-content">
                     <span class="close" onclick="closeModal('addScoreModal')">×</span>
-                    <h2 style="margin-bottom: 20px;">เพิ่ม/ลดคะแนนนักเรียน</h2>
+                    <h2>เพิ่ม/ลดคะแนนนักเรียน</h2>
                     <div class="form-group">
                         <label for="scoreStudentId">นักเรียน</label>
-                        <select id="scoreStudentId" class="form-control">
-                            <!-- Options will be added by JavaScript -->
-                        </select>
+                        <select id="scoreStudentId" class="form-control"></select>
                     </div>
                     <div class="form-group">
                         <label for="scoreClass">ระดับชั้น</label>
@@ -804,11 +249,10 @@
                 </div>
             </div>
 
-            <!-- Add User Modal -->
             <div id="addUserModal" class="modal">
                 <div class="modal-content">
                     <span class="close" onclick="closeModal('addUserModal')">×</span>
-                    <h2 style="margin-bottom: 20px;">เพิ่มผู้ใช้ใหม่</h2>
+                    <h2>เพิ่มผู้ใช้ใหม่</h2>
                     <div class="form-group">
                         <label for="newUserType">ประเภทผู้ใช้</label>
                         <select id="newUserType" class="form-control" onchange="toggleClassField()">
@@ -848,11 +292,10 @@
                 </div>
             </div>
 
-            <!-- Edit User Modal -->
             <div id="editUserModal" class="modal">
                 <div class="modal-content">
                     <span class="close" onclick="closeModal('editUserModal')">×</span>
-                    <h2 style="margin-bottom: 20px;">แก้ไขข้อมูลผู้ใช้</h2>
+                    <h2>แก้ไขข้อมูลผู้ใช้</h2>
                     <div class="form-group">
                         <label for="editUserId">รหัสผู้ใช้</label>
                         <input type="text" id="editUserId" class="form-control" disabled>
@@ -881,17 +324,16 @@
                         <input type="password" id="editUserPassword" class="form-control">
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                        <button class="btn btn-edit" onclick="updateUser()"><i class="fas fa-save"></i> บันทึกการเปลี่ยนแปลง</button>
-                        <button class="btn btn-remove" onclick="deleteUser()"><i class="fas fa-trash"></i> ลบผู้ใช้นี้</button>
+                        <button class="btn btn-edit" onclick="updateUser()"><i class="fas fa-save"></i> บันทึก</button>
+                        <button class="btn btn-remove" onclick="deleteUser()"><i class="fas fa-trash"></i> ลบ</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Request Approval Modal -->
             <div id="approvalModal" class="modal">
                 <div class="modal-content">
                     <span class="close" onclick="closeModal('approvalModal')">×</span>
-                    <h2 style="margin-bottom: 20px;">อนุมัติคำขอเปลี่ยนแปลงคะแนน</h2>
+                    <h2>อนุมัติคำขอเปลี่ยนแปลงคะแนน</h2>
                     <div id="requestDetails"></div>
                     <div class="form-group">
                         <label for="approvalComment">ความคิดเห็น (ไม่จำเป็น)</label>
@@ -904,11 +346,10 @@
                 </div>
             </div>
 
-            <!-- Change Password Modal -->
             <div id="changePasswordModal" class="modal">
                 <div class="modal-content">
                     <span class="close" onclick="closeModal('changePasswordModal')">×</span>
-                    <h2 style="margin-bottom: 20px;">เปลี่ยนรหัสผ่านผู้บริหาร</h2>
+                    <h2>เปลี่ยนรหัสผ่านผู้บริหาร</h2>
                     <div class="form-group">
                         <label for="adminSecurityCode">รหัสยืนยัน</label>
                         <input type="password" id="adminSecurityCode" class="form-control" placeholder="กรอกรหัสยืนยัน">
@@ -926,995 +367,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // ระบบเก็บข้อมูลแบบถาวร
-        const STORAGE_KEY = 'studentBehaviorSystemData';
-        const ADMIN_SECURITY_CODE = '065391'; // รหัสยืนยันสำหรับเปลี่ยนรหัสผ่านผู้บริหาร
-        
-        // ข้อมูลเริ่มต้น
-        const defaultData = {
-            users: [
-                { id: "64001", name: "นักเรียน หนึ่ง", password: "64001", role: "student", class: "ม.1/1", score: 80, logs: [] },
-                { id: "64002", name: "นักเรียน สอง", password: "64002", role: "student", class: "ม.1/2", score: 77, logs: [] },
-                { id: "64003", name: "นักเรียน สาม", password: "64003", role: "student", class: "ม.2/1", score: 90, logs: [] },
-                { id: "64004", name: "นักเรียน สี่", password: "64004", role: "student", class: "ม.2/2", score: 68, logs: [] },
-                { id: "64005", name: "นักเรียน ห้า", password: "64005", role: "student", class: "ม.3/1", score: 77, logs: [] },
-                { id: "64006", name: "นักเรียน หก", password: "64006", role: "student", class: "ม.3/2", score: 85, logs: [] },
-                { id: "64007", name: "นักเรียน เจ็ด", password: "64007", role: "student", class: "ม.4/1", score: 92, logs: [] },
-                { id: "64008", name: "นักเรียน แปด", password: "64008", role: "student", class: "ม.4/2", score: 65, logs: [] },
-                { id: "64009", name: "นักเรียน เก้า", password: "64009", role: "student", class: "ม.5/1", score: 78, logs: [] },
-                { id: "64010", name: "นักเรียน สิบ", password: "64010", role: "student", class: "ม.5/2", score: 88, logs: [] },
-                { id: "64011", name: "นักเรียน สิบเอ็ด", password: "64011", role: "student", class: "ม.6/1", score: 95, logs: [] },
-                { id: "64012", name: "นักเรียน สิบสอง", password: "64012", role: "student", class: "ม.6/2", score: 70, logs: [] },
-                { id: "t001", name: "ครู สมชาย", password: "t001", role: "teacher" },
-                { id: "t002", name: "ครู สมหญิง", password: "t002", role: "teacher" },
-                { id: "admin", name: "ผู้บริหาร ใหญ่", password: "admin", role: "admin" }
-            ],
-            allLogs: [],
-            pendingRequests: [],
-            notifications: []
-        };
-
-        // โหลดข้อมูลจาก localStorage
-        function loadData() {
-            const savedData = localStorage.getItem(STORAGE_KEY);
-            if (!savedData) {
-                saveData(defaultData);
-                return defaultData;
-            }
-            return JSON.parse(savedData);
-        }
-
-        // บันทึกข้อมูล
-        function saveData(data) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                users: data.users,
-                allLogs: data.allLogs,
-                pendingRequests: data.pendingRequests,
-                notifications: data.notifications || []
-            }));
-        }
-
-        // ตัวแปรระบบ
-        let users = [];
-        let allLogs = [];
-        let pendingRequests = [];
-        let notifications = [];
-        let currentUser = null;
-        let selectedRequestId = null;
-
-        // โหลดข้อมูลเมื่อเริ่มต้น
-        function initializeSystem() {
-            const data = loadData();
-            users = data.users;
-            allLogs = data.allLogs;
-            pendingRequests = data.pendingRequests || [];
-            notifications = data.notifications || [];
-        }
-
-        // เปิด/ปิด Sidebar
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.querySelector('.main-content');
-            sidebar.classList.toggle('active');
-            mainContent.classList.toggle('active');
-        }
-
-        // อัปเดตชื่อผู้ใช้ใน header และจัดการปุ่ม
-        function updateHeaderUser() {
-            const userNameSpan = document.getElementById('currentUserName');
-            const headerButtons = document.getElementById('headerButtons');
-            if (currentUser) {
-                userNameSpan.textContent = currentUser.name;
-                // แสดงปุ่ม "เพิ่ม" และ "แก้ไขรหัสผ่าน" เฉพาะผู้บริหารและครู
-                if (currentUser.role === 'admin' || currentUser.role === 'teacher') {
-                    headerButtons.style.display = 'flex';
-                } else {
-                    headerButtons.style.display = 'none';
-                }
-            }
-        }
-
-        // เข้าสู่ระบบ
-        function login() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            
-            if (!username || !password) {
-                alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน!');
-                return;
-            }
-            
-            const loginBtn = document.getElementById('loginBtn');
-            loginBtn.classList.add('active');
-            setTimeout(() => loginBtn.classList.remove('active'), 500);
-            
-            currentUser = users.find(user => user.id === username && user.password === password);
-            
-            if (currentUser) {
-                document.getElementById('loginSection').style.display = 'none';
-                updateHeaderUser(); // อัปเดตชื่อผู้ใช้และปุ่มใน header
-                
-                currentUser.lastLogin = new Date().toISOString();
-                saveData({ users, allLogs, pendingRequests, notifications });
-                
-                const panels = {
-                    'student': showStudentPanel,
-                    'teacher': showTeacherPanel,
-                    'admin': showAdminPanel
-                };
-                panels[currentUser.role]();
-            } else {
-                alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!');
-            }
-        }
-
-        // ออกจากระบบ
-        function logout() {
-            currentUser = null;
-            document.getElementById('loginSection').style.display = 'block';
-            document.getElementById('studentPanel').style.display = 'none';
-            document.getElementById('teacherPanel').style.display = 'none';
-            document.getElementById('adminPanel').style.display = 'none';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            document.getElementById('currentUserName').textContent = '';
-            document.getElementById('headerButtons').style.display = 'none';
-        }
-
-        // แสดงแผงนักเรียน
-        function showStudentPanel() {
-            const panel = document.getElementById('studentPanel');
-            panel.style.display = 'block';
-            
-            document.getElementById('studentInfo').innerHTML = `
-                <p><strong>รหัสนักเรียน:</strong> ${currentUser.id}</p>
-                <p><strong>ชื่อนักเรียน:</strong> ${currentUser.name}</p>
-                ${currentUser.class ? `<p><strong>ระดับชั้น:</strong> ${currentUser.class}</p>` : ''}
-            `;
-            
-            const tbody = document.getElementById('studentScoreBody');
-            tbody.innerHTML = '';
-            
-            if (currentUser.logs && currentUser.logs.length > 0) {
-                currentUser.logs.forEach(log => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${formatDate(log.date)}</td>
-                        <td>${log.reason}</td>
-                        <td class="${log.change > 0 ? 'positive' : 'negative'}">${log.change}</td>
-                        <td>${log.by}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            } else {
-                const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="4" style="text-align: center;">ไม่มีประวัติการเปลี่ยนแปลงคะแนน</td>';
-                tbody.appendChild(row);
-            }
-            
-            document.getElementById('studentTotalScore').innerHTML = `
-                <p><strong>คะแนนรวม:</strong> <span class="${currentUser.score >= 0 ? 'positive' : 'negative'}">${currentUser.score}</span></p>
-            `;
-        }
-
-        // แสดงแผงครู
-        function showTeacherPanel() {
-            const panel = document.getElementById('teacherPanel');
-            panel.style.display = 'block';
-            
-            loadTeacherStudents();
-            loadTeacherPendingRequests();
-            loadTeacherNotifications();
-        }
-
-        // โหลดข้อมูลนักเรียนสำหรับครู
-        function loadTeacherStudents() {
-            const tbody = document.getElementById('teacherStudentBody');
-            tbody.innerHTML = '';
-            
-            const classFilter = document.getElementById('teacherClassFilter').value;
-            const searchQuery = document.getElementById('teacherSearch').value.trim().toLowerCase();
-            
-            let students = users.filter(user => user.role === 'student');
-            
-            if (classFilter) {
-                students = students.filter(student => student.class && student.class.startsWith(classFilter));
-            }
-            
-            if (searchQuery) {
-                students = students.filter(student => 
-                    student.name.toLowerCase().includes(searchQuery) || 
-                    student.id.toLowerCase().includes(searchQuery)
-                );
-            }
-            
-            const classGroups = {};
-            students.forEach(student => {
-                const mainClass = student.class ? student.class.split('/')[0] : 'ไม่มีข้อมูล';
-                if (!classGroups[mainClass]) {
-                    classGroups[mainClass] = [];
-                }
-                classGroups[mainClass].push(student);
-            });
-            
-            Object.keys(classGroups).sort().forEach(mainClass => {
-                const headerRow = document.createElement('tr');
-                headerRow.className = 'class-header';
-                headerRow.innerHTML = `<td colspan="5">${mainClass}</td>`;
-                tbody.appendChild(headerRow);
-                
-                classGroups[mainClass].forEach(student => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${student.id}</td>
-                        <td>${student.name}</td>
-                        <td>${student.class || '-'}</td>
-                        <td class="${student.score > 0 ? 'positive' : 'negative'}">${student.score}</td>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-increase" onclick="openAddScoreModal('${student.id}', true)">
-                                    <i class="fas fa-plus"></i> เพิ่ม
-                                </button>
-                                <button class="btn btn-decrease" onclick="openAddScoreModal('${student.id}', false)">
-                                    <i class="fas fa-minus"></i> ลด
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            });
-            
-            if (students.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td colspan="5" style="text-align: center;">
-                        ไม่พบข้อมูลนักเรียน${classFilter || searchQuery ? 'ตามเงื่อนไขที่เลือก' : ''}
-                    </td>
-                `;
-                tbody.appendChild(row);
-            }
-        }
-
-        // โหลดข้อมูลครูสำหรับผู้ดูแล
-        function loadAdminTeachers() {
-            const tbody = document.getElementById('adminTeacherBody');
-            tbody.innerHTML = '';
-            
-            const teachers = users.filter(user => user.role === 'teacher');
-            
-            teachers.forEach(teacher => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${teacher.id}</td>
-                    <td>${teacher.name}</td>
-                    <td>
-                        <button class="btn btn-edit" onclick="editUser('${teacher.id}')">
-                            <i class="fas fa-edit"></i> แก้ไข
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-            
-            if (teachers.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="3" style="text-align: center;">ไม่มีข้อมูลครู</td>';
-                tbody.appendChild(row);
-            }
-        }
-
-        // เปิดโมดอลเพิ่มผู้ใช้
-        function openAddUserModal() {
-            const modal = document.getElementById('addUserModal');
-            document.getElementById('newUserType').value = 'student';
-            document.getElementById('newUserId').value = '';
-            document.getElementById('newUserName').value = '';
-            document.getElementById('newUserClass').value = 'ม.1';
-            document.getElementById('newUserSubClass').value = '';
-            document.getElementById('newUserPassword').value = '';
-            toggleClassField();
-            modal.style.display = 'flex';
-        }
-
-        // สลับการแสดงฟิลด์ระดับชั้น
-        function toggleClassField() {
-            const userType = document.getElementById('newUserType').value;
-            const classGroup = document.getElementById('newUserClassGroup');
-            const subClassGroup = document.getElementById('newUserSubClassGroup');
-            if (userType === 'student') {
-                classGroup.style.display = 'block';
-                subClassGroup.style.display = 'block';
-            } else {
-                classGroup.style.display = 'none';
-                subClassGroup.style.display = 'none';
-            }
-        }
-
-        // เพิ่มผู้ใช้ใหม่
-        function addNewUser() {
-            const userType = document.getElementById('newUserType').value;
-            const userId = document.getElementById('newUserId').value.trim();
-            const userName = document.getElementById('newUserName').value.trim();
-            const userClass = document.getElementById('newUserClass').value;
-            const userSubClass = document.getElementById('newUserSubClass').value.trim();
-            const password = document.getElementById('newUserPassword').value;
-            
-            if (!userId || !userName || !password) {
-                alert('กรุณากรอกข้อมูลให้ครบถ้วน!');
-                return;
-            }
-            
-            if (users.some(user => user.id === userId)) {
-                alert('รหัสผู้ใช้นี้มีอยู่แล้ว!');
-                return;
-            }
-            
-            const newUser = {
-                id: userId,
-                name: userName,
-                password: password,
-                role: userType
-            };
-            
-            if (userType === 'student') {
-                newUser.class = userSubClass ? `${userClass}/${userSubClass}` : userClass;
-                newUser.score = 80;
-                newUser.logs = [];
-            }
-            
-            users.push(newUser);
-            saveData({ users, allLogs, pendingRequests, notifications });
-            closeModal('addUserModal');
-            
-            if (userType === 'student') {
-                loadAdminStudents();
-            } else if (userType === 'teacher') {
-                loadAdminTeachers();
-            }
-            
-            alert('เพิ่มผู้ใช้เรียบร้อยแล้ว!');
-        }
-
-        // เปิดโมดอลแก้ไขผู้ใช้
-        function editUser(userId) {
-            const user = users.find(u => u.id === userId);
-            if (!user) return;
-            
-            const modal = document.getElementById('editUserModal');
-            document.getElementById('editUserId').value = user.id;
-            document.getElementById('editUserName').value = user.name;
-            
-            const classGroup = document.getElementById('editUserClassGroup');
-            const subClassGroup = document.getElementById('editUserSubClassGroup');
-            
-            if (user.role === 'student') {
-                classGroup.style.display = 'block';
-                subClassGroup.style.display = 'block';
-                if (user.class) {
-                    const [mainClass, subClass] = user.class.split('/');
-                    document.getElementById('editUserClass').value = mainClass || 'ม.1';
-                    document.getElementById('editUserSubClass').value = subClass || '';
-                } else {
-                    document.getElementById('editUserClass').value = 'ม.1';
-                    document.getElementById('editUserSubClass').value = '';
-                }
-            } else {
-                classGroup.style.display = 'none';
-                subClassGroup.style.display = 'none';
-            }
-            
-            document.getElementById('editUserPassword').value = '';
-            modal.style.display = 'flex';
-        }
-
-        // อัปเดตข้อมูลผู้ใช้
-        function updateUser() {
-            const userId = document.getElementById('editUserId').value;
-            const user = users.find(u => u.id === userId);
-            if (!user) return;
-            
-            const newName = document.getElementById('editUserName').value.trim();
-            const newClass = document.getElementById('editUserClass').value;
-            const newSubClass = document.getElementById('editUserSubClass').value.trim();
-            const newPassword = document.getElementById('editUserPassword').value;
-            
-            if (!newName) {
-                alert('กรุณากรอกชื่อ-สกุล!');
-                return;
-            }
-            
-            user.name = newName;
-            if (user.role === 'student') {
-                user.class = newSubClass ? `${newClass}/${newSubClass}` : newClass;
-            }
-            if (newPassword) {
-                user.password = newPassword;
-            }
-            
-            saveData({ users, allLogs, pendingRequests, notifications });
-            closeModal('editUserModal');
-            
-            if (user.role === 'student') {
-                loadAdminStudents();
-            } else if (user.role === 'teacher') {
-                loadAdminTeachers();
-            }
-            
-            alert('อัปเดตข้อมูลผู้ใช้เรียบร้อยแล้ว!');
-        }
-
-        // ลบผู้ใช้
-        function deleteUser() {
-            if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้นี้?')) return;
-            
-            const userId = document.getElementById('editUserId').value;
-            const user = users.find(u => u.id === userId);
-            if (!user) return;
-            
-            users = users.filter(u => u.id !== userId);
-            saveData({ users, allLogs, pendingRequests, notifications });
-            closeModal('editUserModal');
-            
-            if (user.role === 'student') {
-                loadAdminStudents();
-            } else if (user.role === 'teacher') {
-                loadAdminTeachers();
-            }
-            
-            alert('ลบผู้ใช้เรียบร้อยแล้ว!');
-        }
-
-        // เปิดโมดอลเปลี่ยนรหัสผ่านผู้บริหาร
-        function openChangePasswordModal() {
-            const modal = document.getElementById('changePasswordModal');
-            document.getElementById('adminSecurityCode').value = '';
-            document.getElementById('newAdminPassword').value = '';
-            document.getElementById('confirmAdminPassword').value = '';
-            modal.style.display = 'flex';
-        }
-
-        // เปลี่ยนรหัสผ่านผู้บริหาร
-        function changeAdminPassword() {
-            const securityCode = document.getElementById('adminSecurityCode').value;
-            const newPassword = document.getElementById('newAdminPassword').value;
-            const confirmPassword = document.getElementById('confirmAdminPassword').value;
-
-            if (securityCode !== ADMIN_SECURITY_CODE) {
-                alert('รหัสยืนยันไม่ถูกต้อง!');
-                return;
-            }
-
-            if (newPassword !== confirmPassword) {
-                alert('รหัสผ่านใหม่และยืนยันรหัสผ่านไม่ตรงกัน!');
-                return;
-            }
-
-            if (newPassword.length < 6) {
-                alert('รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร!');
-                return;
-            }
-
-            const admin = users.find(u => u.id === 'admin');
-            if (admin) {
-                admin.password = newPassword;
-                saveData({ users, allLogs, pendingRequests, notifications });
-                closeModal('changePasswordModal');
-                alert('เปลี่ยนรหัสผ่านเรียบร้อยแล้ว!');
-            }
-        }
-        // แสดงแผงผู้ดูแล
-        function showAdminPanel() {
-            const panel = document.getElementById('adminPanel');
-            panel.style.display = 'block';
-            
-            openTab('adminStudents');
-        }
-
-        // เปิดแท็บ
-        function openTab(tabName) {
-            document.querySelectorAll('#adminPanel .tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            document.querySelectorAll('#adminPanel .tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            document.getElementById(tabName).classList.add('active');
-            event.currentTarget.classList.add('active');
-            
-            if (tabName === 'adminStudents') {
-                loadAdminStudents();
-            } else if (tabName === 'adminTeachers') {
-                loadAdminTeachers();
-            } else if (tabName === 'adminPendingRequests') {
-                loadAdminPendingRequests();
-            } else if (tabName === 'adminLogs') {
-                loadAdminLogs();
-            }
-        }
-
-        // โหลดข้อมูลนักเรียนสำหรับผู้ดูแล
-        function loadAdminStudents() {
-            const tbody = document.getElementById('adminStudentBody');
-            tbody.innerHTML = '';
-            
-            const classFilter = document.getElementById('adminClassFilter').value;
-            const searchQuery = document.getElementById('adminSearch').value.trim().toLowerCase();
-            
-            let students = users.filter(user => user.role === 'student');
-            
-            // กรองตามชั้นเรียน
-            if (classFilter) {
-                students = students.filter(student => student.class && student.class.startsWith(classFilter));
-            }
-            
-            // กรองตามคำค้นหา (ชื่อหรือรหัส)
-            if (searchQuery) {
-                students = students.filter(student => 
-                    student.name.toLowerCase().includes(searchQuery) || 
-                    student.id.toLowerCase().includes(searchQuery)
-                );
-            }
-            
-            const classGroups = {};
-            students.forEach(student => {
-                const mainClass = student.class ? student.class.split('/')[0] : 'ไม่มีข้อมูล';
-                if (!classGroups[mainClass]) {
-                    classGroups[mainClass] = [];
-                }
-                classGroups[mainClass].push(student);
-            });
-            
-            Object.keys(classGroups).sort().forEach(mainClass => {
-                const headerRow = document.createElement('tr');
-                headerRow.className = 'class-header';
-                headerRow.innerHTML = `<td colspan="5">${mainClass}</td>`;
-                tbody.appendChild(headerRow);
-                
-                classGroups[mainClass].forEach(student => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${student.id}</td>
-                        <td>${student.name}</td>
-                        <td>${student.class || '-'}</td>
-                        <td class="${student.score > 0 ? 'positive' : 'negative'}">${student.score}</td>
-                        <td>
-                            <button class="btn btn-edit" onclick="editUser('${student.id}')">
-                                <i class="fas fa-edit"></i> แก้ไข
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            });
-            
-            if (students.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td colspan="5" style="text-align: center;">
-                        ไม่พบข้อมูลนักเรียน${classFilter || searchQuery ? 'ตามเงื่อนไขที่เลือก' : ''}
-                    </td>
-                `;
-                tbody.appendChild(row);
-            }
-        }
-
-        // โหลดคำขอที่รออนุมัติสำหรับครู
-        function loadTeacherPendingRequests() {
-            const container = document.getElementById('teacherRequestsContainer');
-            container.innerHTML = '';
-            
-            const teacherRequests = pendingRequests.filter(
-                req => req.requestedBy === currentUser.id
-            );
-            
-            if (teacherRequests.length === 0) {
-                container.innerHTML = '<p>ไม่มีคำขอที่รอการอนุมัติ</p>';
-                return;
-            }
-            
-            teacherRequests.forEach(request => {
-                const accordion = document.createElement('div');
-                accordion.className = 'accordion';
-                accordion.innerHTML = `
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>
-                            <strong>${request.studentName} (${request.studentId})</strong> - 
-                            ${request.change > 0 ? '+' : ''}${request.change} คะแนน
-                            <span class="status-pending">(รออนุมัติ)</span>
-                        </span>
-                        <i class="fas fa-chevron-right accordion-icon"></i>
-                    </div>
-                    <div class="accordion-content">
-                        <p><strong>เหตุผล:</strong> ${request.reason}</p>
-                        <p><strong>วันที่ส่งคำขอ:</strong> ${formatDate(request.requestDate)}</p>
-                        <p><strong>ระดับชั้น:</strong> ${request.studentClass}</p>
-                        <div class="btn-group" style="margin-top: 10px;">
-                            <button class="btn btn-edit" onclick="editRequest('${request.id}')">
-                                <i class="fas fa-edit"></i> แก้ไข
-                            </button>
-                            <button class="btn btn-remove" onclick="cancelRequest('${request.id}')">
-                                <i class="fas fa-trash"></i> ยกเลิก
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(accordion);
-            });
-        }
-
-        // โหลดการแจ้งเตือนสำหรับครู
-        function loadTeacherNotifications() {
-            const container = document.getElementById('teacherNotificationsContainer');
-            container.innerHTML = '';
-
-            let teacherNotifications = notifications.filter(
-                notif => notif.teacherId === currentUser.id
-            );
-
-            const now = new Date();
-            teacherNotifications = teacherNotifications.filter(notif => {
-                const createdAt = new Date(notif.createdAt);
-                const ageInHours = (now - createdAt) / (1000 * 60 * 60);
-                return ageInHours <= 24;
-            });
-
-            notifications = notifications.filter(notif => {
-                const createdAt = new Date(notif.createdAt);
-                const ageInHours = (now - createdAt) / (1000 * 60 * 60);
-                return ageInHours <= 24;
-            });
-            saveData({ users, allLogs, pendingRequests, notifications });
-
-            if (teacherNotifications.length === 0) {
-                container.innerHTML = '<p>ไม่มีข้อความแจ้งเตือน</p>';
-                return;
-            }
-
-            teacherNotifications.forEach(notif => {
-                const accordion = document.createElement('div');
-                accordion.className = 'accordion';
-                accordion.innerHTML = `
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>
-                            <strong>การแจ้งเตือน</strong> - 
-                            <span class="status-${notif.status}">${notif.status === 'approved' ? 'อนุมัติ' : 'ปฏิเสธ'}</span>
-                        </span>
-                        <i class="fas fa-chevron-right accordion-icon"></i>
-                    </div>
-                    <div class="accordion-content">
-                        <p>${notif.message}</p>
-                        <p><strong>วันที่:</strong> ${formatDate(notif.createdAt)}</p>
-                    </div>
-                `;
-                container.appendChild(accordion);
-            });
-        }
-
-        // โหลดคำขอที่รออนุมัติสำหรับผู้ดูแล
-        function loadAdminPendingRequests() {
-            const container = document.getElementById('adminRequestsContainer');
-            container.innerHTML = '';
-            
-            if (pendingRequests.length === 0) {
-                container.innerHTML = '<p>ไม่มีคำขอที่รอการอนุมัติ</p>';
-                return;
-            }
-            
-            pendingRequests.forEach(request => {
-                const accordion = document.createElement('div');
-                accordion.className = 'accordion';
-                accordion.innerHTML = `
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>
-                            <strong>${request.studentName} (${request.studentId})</strong> - 
-                            ${request.change > 0 ? '+' : ''}${request.change} คะแนน
-                            <span class="status-pending">(รออนุมัติ)</span>
-                        </span>
-                        <i class="fas fa-chevron-right accordion-icon"></i>
-                    </div>
-                    <div class="accordion-content">
-                        <p><strong>ครูผู้ขอ:</strong> ${request.teacherName}</p>
-                        <p><strong>เหตุผล:</strong> ${request.reason}</p>
-                        <p><strong>วันที่ส่งคำขอ:</strong> ${formatDate(request.requestDate)}</p>
-                        <p><strong>ระดับชั้น:</strong> ${request.studentClass}</p>
-                        <div class="btn-group" style="margin-top: 10px;">
-                            <button class="btn btn-approve" onclick="openApprovalModal('${request.id}')">
-                                <i class="fas fa-check"></i> อนุมัติ
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(accordion);
-            });
-        }
-
-        // โหลดประวัติการเปลี่ยนแปลง
-        function loadAdminLogs() {
-            const logsContainer = document.getElementById('adminLogsContainer');
-            logsContainer.innerHTML = '';
-
-            const now = new Date();
-            allLogs = allLogs.filter(log => {
-                const logDate = new Date(log.date);
-                const ageInDays = (now - logDate) / (1000 * 60 * 60 * 24);
-                return ageInDays <= 7;
-            });
-
-            saveData({ users, allLogs, pendingRequests, notifications });
-
-            if (allLogs.length > 0) {
-                allLogs.sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .forEach(log => {
-                        const logEntry = document.createElement('div');
-                        logEntry.className = 'log-entry';
-                        logEntry.innerHTML = `
-                            <p><strong>${formatDate(log.date)}</strong></p>
-                            <p>นักเรียน: ${log.studentName} (${log.studentId}) ${log.studentClass ? 'ชั้น ' + log.studentClass : ''}</p>
-                            <p>คะแนนที่เปลี่ยนแปลง: 
-                                <span class="${log.change > 0 ? 'positive' : 'negative'}">
-                                    ${log.change > 0 ? '+' : ''}${log.change}
-                                </span>
-                            </p>
-                            <p>เหตุผล: ${log.reason}</p>
-                            <p>โดย: ${log.by}</p>
-                            <p>สถานะ: <span class="status-${log.status || 'approved'}">${
-                                log.status === 'approved' ? 'อนุมัติ' : 
-                                log.status === 'rejected' ? 'ไม่อนุมัติ' : 'เสร็จสิ้น'
-                            }</span></p>
-                            <hr style="margin: 10px 0; border-color: #555;">
-                        `;
-                        logsContainer.appendChild(logEntry);
-                    });
-            } else {
-                logsContainer.innerHTML = "<p>ไม่มีประวัติการเปลี่ยนแปลงคะแนน</p>";
-            }
-        }
-
-        // เปิดโมดอลเพิ่ม/ลดคะแนน
-        function openAddScoreModal(studentId = null, isIncrease = true) {
-            const modal = document.getElementById('addScoreModal');
-            const select = document.getElementById('scoreStudentId');
-            select.innerHTML = '';
-            
-            const students = users.filter(user => user.role === 'student');
-            students.forEach(student => {
-                const option = document.createElement('option');
-                option.value = student.id;
-                option.textContent = `${student.name} (${student.id}) ${student.class ? 'ชั้น ' + student.class : ''}`;
-                if (studentId && student.id === studentId) {
-                    option.selected = true;
-                    document.getElementById('scoreClass').value = student.class ? student.class.split('/')[0] : 'ม.1';
-                }
-                select.appendChild(option);
-            });
-            
-            document.getElementById('scoreChange').value = isIncrease ? '1' : '-1';
-            document.getElementById('scoreReason').value = '';
-            modal.style.display = 'flex';
-        }
-
-        // ตั้งค่าค่าคะแนน
-        function setScoreValue(value) {
-            const scoreInput = document.getElementById('scoreChange');
-            const currentValue = parseInt(scoreInput.value) || 0;
-            
-            if (value > 0) {
-                scoreInput.value = Math.max(1, currentValue + value);
-            } else {
-                scoreInput.value = Math.min(-1, currentValue + value);
-            }
-        }
-
-        // ส่งคำขอเปลี่ยนแปลงคะแนน
-        function submitScoreRequest() {
-            const studentId = document.getElementById('scoreStudentId').value;
-            const change = parseInt(document.getElementById('scoreChange').value);
-            const reason = document.getElementById('scoreReason').value.trim();
-            const studentClass = document.getElementById('scoreClass').value;
-            
-            if (!studentId) {
-                alert('กรุณาเลือกนักเรียน!');
-                return;
-            }
-            
-            if (isNaN(change)) {
-                alert('กรุณากรอกจำนวนคะแนนเป็นตัวเลข!');
-                return;
-            }
-            
-            if (!reason || reason.length < 5) {
-                alert('กรุณากรอกเหตุผลอย่างน้อย 5 ตัวอักษร!');
-                return;
-            }
-            
-            const student = users.find(user => user.id === studentId && user.role === 'student');
-            if (student) {
-                const requestId = 'req-' + Date.now();
-                const newRequest = {
-                    id: requestId,
-                    studentId: student.id,
-                    studentName: student.name,
-                    studentClass: student.class,
-                    change: change,
-                    reason: reason,
-                    teacherName: currentUser.name,
-                    requestedBy: currentUser.id,
-                    requestDate: new Date().toISOString(),
-                    status: 'pending'
-                };
-                
-                pendingRequests.push(newRequest);
-                saveData({ users, allLogs, pendingRequests, notifications });
-                closeModal('addScoreModal');
-                
-                alert('ส่งคำขอเปลี่ยนแปลงคะแนนเรียบร้อย รอการอนุมัติจากผู้บริหาร');
-                
-                if (currentUser.role === 'teacher') {
-                    showTeacherPanel();
-                }
-            }
-        }
-
-        // เปิดโมดอลอนุมัติคำขอ
-        function openApprovalModal(requestId) {
-            selectedRequestId = requestId;
-            const request = pendingRequests.find(req => req.id === requestId);
-            if (!request) return;
-            
-            document.getElementById('requestDetails').innerHTML = `
-                <p><strong>นักเรียน:</strong> ${request.studentName} (${request.studentId})</p>
-                <p><strong>ระดับชั้น:</strong> ${request.studentClass}</p>
-                <p><strong>ครูผู้ขอ:</strong> ${request.teacherName}</p>
-                <p><strong>คะแนนที่เปลี่ยนแปลง:</strong> 
-                    <span class="${request.change > 0 ? 'positive' : 'negative'}">
-                        ${request.change > 0 ? '+' : ''}${request.change}
-                    </span>
-                </p>
-                <p><strong>เหตุผล:</strong> ${request.reason}</p>
-                <p><strong>วันที่ส่งคำขอ:</strong> ${formatDate(request.requestDate)}</p>
-            `;
-            
-            document.getElementById('approvalComment').value = '';
-            document.getElementById('approvalModal').style.display = 'flex';
-        }
-
-        // อนุมัติหรือปฏิเสธคำขอ
-        function approveRequest(isApproved) {
-            const request = pendingRequests.find(req => req.id === selectedRequestId);
-            if (!request) return;
-            
-            const comment = document.getElementById('approvalComment').value.trim();
-            const student = users.find(user => user.id === request.studentId && user.role === 'student');
-            
-            const logEntry = {
-                date: new Date().toISOString(),
-                studentId: request.studentId,
-                studentName: request.studentName,
-                studentClass: request.studentClass,
-                change: request.change,
-                reason: request.reason,
-                by: request.teacherName,
-                status: isApproved ? 'approved' : 'rejected',
-                comment: comment
-            };
-            
-            if (isApproved && student) {
-                student.score = (student.score || 0) + request.change;
-                student.logs = student.logs || [];
-                student.logs.push({
-                    date: new Date().toISOString(),
-                    reason: request.reason,
-                    change: request.change,
-                    by: request.teacherName
-                });
-            }
-            
-            allLogs.push(logEntry);
-            
-            const notification = {
-                teacherId: request.requestedBy,
-                message: `คำขอเปลี่ยนแปลงคะแนนสำหรับ ${request.studentName} (${request.studentId}) จำนวน ${request.change > 0 ? '+' : ''}${request.change} คะแนน ได้ถูก${isApproved ? 'อนุมัติ' : 'ปฏิเสธ'}${comment ? ' ความคิดเห็น: ' + comment : ''}`,
-                status: isApproved ? 'approved' : 'rejected',
-                createdAt: new Date().toISOString()
-            };
-            notifications.push(notification);
-            
-            pendingRequests = pendingRequests.filter(req => req.id !== selectedRequestId);
-            saveData({ users, allLogs, pendingRequests, notifications });
-            
-            closeModal('approvalModal');
-            showAdminPanel();
-            alert(`คำขอถูก${isApproved ? 'อนุมัติ' : 'ปฏิเสธ'}เรียบร้อยแล้ว!`);
-        }
-
-        // แก้ไขคำขอ
-        function editRequest(requestId) {
-            const request = pendingRequests.find(req => req.id === requestId);
-            if (!request) return;
-            
-            openAddScoreModal(request.studentId, request.change > 0);
-            document.getElementById('scoreChange').value = request.change;
-            document.getElementById('scoreReason').value = request.reason;
-            document.getElementById('scoreClass').value = request.studentClass ? request.studentClass.split('/')[0] : 'ม.1';
-            
-            pendingRequests = pendingRequests.filter(req => req.id !== requestId);
-            saveData({ users, allLogs, pendingRequests, notifications });
-        }
-
-        // ยกเลิกคำขอ
-        function cancelRequest(requestId) {
-            if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกคำขอนี้?')) return;
-            
-            pendingRequests = pendingRequests.filter(req => req.id !== requestId);
-            saveData({ users, allLogs, pendingRequests, notifications });
-            loadTeacherPendingRequests();
-            alert('ยกเลิกคำขอเรียบร้อยแล้ว!');
-        }
-
-        // ปิดโมดอล
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // ฟังก์ชันช่วยเหลือ
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleString('th-TH', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        // เปิด/ปิด Accordion
-        function toggleAccordion(element) {
-            const accordion = element.parentElement;
-            accordion.classList.toggle('active');
-            
-            const content = element.nextElementSibling;
-            if (accordion.classList.contains('active')) {
-                content.style.display = 'block';
-            } else {
-                content.style.display = 'none';
-            }
-        }
-
-        // แสดงส่วนต่างๆ (สำหรับ sidebar)
-        function showSection(section) {
-            const sections = ['home', 'manage', 'students', 'teachers', 'profile'];
-            sections.forEach(s => {
-                const panel = document.getElementById(`${s}Panel`);
-                if (panel) panel.style.display = 'none';
-            });
-            
-            if (section === 'home') {
-                if (currentUser.role === 'student') showStudentPanel();
-                else if (currentUser.role === 'teacher') showTeacherPanel();
-                else if (currentUser.role === 'admin') showAdminPanel();
-            } else if (section === 'manage' && currentUser.role === 'admin') {
-                showAdminPanel();
-            } else if (section === 'students') {
-                if (currentUser.role === 'teacher') showTeacherPanel();
-                else if (currentUser.role === 'admin') showAdminPanel();
-            } else if (section === 'teachers' && currentUser.role === 'admin') {
-                showAdminPanel();
-                openTab('adminTeachers');
-            } else if (section === 'profile') {
-                alert('ฟังก์ชันโปรไฟล์ยังไม่พร้อมใช้งาน');
-            }
-            
-            toggleSidebar();
-        }
-
-        // เริ่มต้นระบบ
-        initializeSystem();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
