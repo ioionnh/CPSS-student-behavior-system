@@ -1,25 +1,10 @@
-// Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyDUvzub1dXVNm1SJ0Z6-dYzfyU7mSxdCLw",
-    authDomain: "schoolscoresystem.firebaseapp.com",
-    projectId: "schoolscoresystem",
-    storageBucket: "schoolscoresystem.firebasestorage.app",
-    messagingSenderId: "185420323664",
-    appId: "1:185420323664:web:e0898ca57b02fa2cd7ea55",
-    measurementId: "G-VWMN016RTV"
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
 // ตัวแปรระบบ
+const ADMIN_SECURITY_CODE = '065391';
 let currentUser = null;
 let selectedRequestId = null;
-const ADMIN_SECURITY_CODE = '065391';
 
-// ข้อมูลเริ่มต้น
-const defaultData = {
+// In-memory data store
+const dataStore = {
     users: [
         { id: "64001", name: "นักเรียน หนึ่ง", password: "64001", role: "student", class: "ม.1/1", score: 80, logs: [] },
         { id: "64002", name: "นักเรียน สอง", password: "64002", role: "student", class: "ม.1/2", score: 77, logs: [] },
@@ -45,15 +30,8 @@ const defaultData = {
 // โหลดข้อมูลเริ่มต้นเมื่อเริ่มต้น
 async function initializeSystem() {
     try {
-        const usersSnapshot = await db.collection('users').get();
-        if (usersSnapshot.empty) {
-            for (const user of defaultData.users) {
-                await db.collection('users').doc(user.id).set(user);
-            }
-            await db.collection('system').doc('logs').set({ allLogs: defaultData.allLogs });
-            await db.collection('system').doc('pendingRequests').set({ requests: defaultData.pendingRequests });
-            await db.collection('system').doc('notifications').set({ notifications: defaultData.notifications });
-        }
+        // No initialization needed for in-memory store as data is already defined
+        console.log('System initialized with in-memory data');
     } catch (error) {
         console.error('Error initializing system:', error);
         showToast('เกิดข้อผิดพลาดในการโหลดระบบ', 'error');
@@ -63,8 +41,7 @@ async function initializeSystem() {
 // โหลดข้อมูลผู้ใช้
 async function loadUsers() {
     try {
-        const snapshot = await db.collection('users').get();
-        return snapshot.docs.map(doc => doc.data());
+        return Promise.resolve(dataStore.users);
     } catch (error) {
         console.error('Error loading users:', error);
         throw error;
@@ -74,7 +51,13 @@ async function loadUsers() {
 // บันทึกข้อมูลผู้ใช้
 async function saveUser(user) {
     try {
-        await db.collection('users').doc(user.id).set(user);
+        const index = dataStore.users.findIndex(u => u.id === user.id);
+        if (index !== -1) {
+            dataStore.users[index] = { ...dataStore.users[index], ...user };
+        } else {
+            dataStore.users.push(user);
+        }
+        return Promise.resolve();
     } catch (error) {
         console.error('Error saving user:', error);
         throw error;
@@ -84,8 +67,7 @@ async function saveUser(user) {
 // โหลด logs
 async function loadLogs() {
     try {
-        const doc = await db.collection('system').doc('logs').get();
-        return doc.exists ? doc.data().allLogs : [];
+        return Promise.resolve(dataStore.allLogs);
     } catch (error) {
         console.error('Error loading logs:', error);
         throw error;
@@ -95,7 +77,8 @@ async function loadLogs() {
 // บันทึก logs
 async function saveLogs(logs) {
     try {
-        await db.collection('system').doc('logs').set({ allLogs: logs });
+        dataStore.allLogs = logs;
+        return Promise.resolve();
     } catch (error) {
         console.error('Error saving logs:', error);
         throw error;
@@ -105,8 +88,7 @@ async function saveLogs(logs) {
 // โหลด pending requests
 async function loadPendingRequests() {
     try {
-        const doc = await db.collection('system').doc('pendingRequests').get();
-        return doc.exists ? doc.data().requests : [];
+        return Promise.resolve(dataStore.pendingRequests);
     } catch (error) {
         console.error('Error loading pending requests:', error);
         throw error;
@@ -116,7 +98,8 @@ async function loadPendingRequests() {
 // บันทึก pending requests
 async function savePendingRequests(requests) {
     try {
-        await db.collection('system').doc('pendingRequests').set({ requests });
+        dataStore.pendingRequests = requests;
+        return Promise.resolve();
     } catch (error) {
         console.error('Error saving pending requests:', error);
         throw error;
@@ -126,8 +109,7 @@ async function savePendingRequests(requests) {
 // โหลด notifications
 async function loadNotifications() {
     try {
-        const doc = await db.collection('system').doc('notifications').get();
-        return doc.exists ? doc.data().notifications : [];
+        return Promise.resolve(dataStore.notifications);
     } catch (error) {
         console.error('Error loading notifications:', error);
         throw error;
@@ -137,7 +119,8 @@ async function loadNotifications() {
 // บันทึก notifications
 async function saveNotifications(notifications) {
     try {
-        await db.collection('system').doc('notifications').set({ notifications });
+        dataStore.notifications = notifications;
+        return Promise.resolve();
     } catch (error) {
         console.error('Error saving notifications:', error);
         throw error;
@@ -1086,7 +1069,7 @@ async function deleteUser() {
             return;
         }
 
-        await db.collection('users').doc(userId).delete();
+        dataStore.users = users.filter(u => u.id !== userId);
         closeModal('editUserModal');
 
         if (user.role === 'student') {
