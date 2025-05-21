@@ -3,370 +3,371 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>โรงเรียนชุมแพศึกษา - ระบบบันทึกคะแนนพฤติกรรม</title>
-    <link rel="icon" type="image/png" href="https://www.google.com/url?sa=i&url=https%3A%2F%2Fregstd.cpss.ac.th%2F&psig=AOvVaw395jp2zQpcUflpCUAFYUNB&ust=1747817442850000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCICYur_VsY0DFQAAAAAdAAAAABAE">
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+    <title>LawQuizCool v2 - ทายปัญหากฎหมายสุดเท่</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        h1 {
+            color: #00f2ff;
+            text-shadow: 0 0 15px #00f2ff, 0 0 30px #ff00ff;
+            font-size: 2.5em;
+            animation: glow 2s infinite alternate;
+        }
+        .quiz-container, .result-container {
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            padding: 20px;
+            border: 2px solid #ff00ff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px #ff00ff;
+            margin-bottom: 20px;
+            animation: slideIn 0.5s;
+        }
+        .choices {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .choice {
+            padding: 12px;
+            font-size: 1.1em;
+            background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
+            color: #ffffff;
+            border: 2px solid #00f2ff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .choice:hover {
+            background: linear-gradient(45deg, #ff00ff, #00f2ff);
+            color: #1a1a1a;
+            box-shadow: 0 0 15px #ff00ff;
+        }
+        .choice.selected {
+            background: linear-gradient(45deg, #00f2ff, #ff00ff);
+            color: #1a1a1a;
+            border-color: #ff00ff;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 1.1em;
+            background: linear-gradient(45deg, #ff00ff, #00f2ff);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 15px #ff00ff;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px #00f2ff;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+        #result.correct {
+            background: linear-gradient(45deg, #00f2ff, #1a1a1a);
+            color: #ffffff;
+        }
+        #result.wrong {
+            background: linear-gradient(45deg, #ff00ff, #1a1a1a);
+            color: #ffffff;
+        }
+        #lockMessage {
+            color: #ff00ff;
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        canvas {
+            margin-top: 20px;
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px #00f2ff;
+        }
+        a {
+            color: #00f2ff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        a:hover {
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+        .hidden {
+            display: none;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #00f2ff, 0 0 20px #ff00ff; }
+            to { text-shadow: 0 0 20px #00f2ff, 0 0 30px #ff00ff; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8em; }
+            .choices { grid-template-columns: 1fr; }
+            .choice { font-size: 1em; }
+        }
+    </style>
 </head>
 <body>
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <img src="https://cdn.discordapp.com/attachments/790080660735787008/1360262389613723830/-150x150-1.png?ex=67fa7a92&is=67f92912&hm=a29e840c68e99d91aabb3128c72d567fe966cc0bef866e9a0b30ad8e6cde909f&" alt="School Logo" class="school-logo">
-            <h2>โรงเรียนชุมแพศึกษา</h2>
+    <div class="container">
+        <h1>LawQuizCool v2 - ทายปัญหากฎหมายสุดเท่</h1>
+        <div id="quizContainer" class="quiz-container">
+            <p id="question"></p>
+            <div id="choices" class="choices"></div>
+            <button onclick="checkAnswer()" id="submitButton">ยืนยันคำตอบ</button>
         </div>
-        <ul class="sidebar-menu">
-            <li><a href="#" onclick="showSection('home')"><i class="fas fa-home"></i> หน้าแรก</a></li>
-            <li><a href="#" onclick="showSection('manage')"><i class="fas fa-users"></i> จัดการผู้ใช้</a></li>
-            <li><a href="#" onclick="showSection('students')"><i class="fas fa-book"></i> นักเรียน</a></li>
-            <li><a href="#" onclick="showSection('teachers')"><i class="fas fa-chalkboard-teacher"></i> ครู</a></li>
-            <li><a href="#" onclick="showSection('profile')"><i class="fas fa-user"></i> โปรไฟล์</a></li>
-            <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a></li>
-        </ul>
+        <div id="result"></div>
+        <div id="lockMessage"></div>
+        <button onclick="resetCooldown()" style="display: none;" id="resetButton">รีเซ็ตคูลดาวน์</button>
+        <div id="resultContainer" class="result-container hidden">
+            <p id="score"></p>
+            <p id="finalResult"><strong>เฉลย:</strong> ลุงรหัสชอบกฎหมาย! ใบโอคือพี่รหัสที่ซ่อนรหัสลับ 0609 ไว้! ไปดูหน้า IG <a href="https://www.instagram.com/ThaiTrafficLaw" target="_blank">@ThaiTrafficLaw</a> เพื่อหาไอเดียเกี่ยวกับใบสั่งจราจรเพิ่มเติม!</p>
+            <button onclick="restartQuiz()">เล่นควิซใหม่</button>
+        </div>
+        <canvas id="scoreChart"></canvas>
     </div>
 
-    <div class="main-content">
-        <header class="top-header">
-            <div class="header-left">
-                <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()" style="display: none;"><i class="fas fa-bars"></i></button>
-                <img src="https://cdn.discordapp.com/attachments/790080660735787008/1360262389613723830/-150x150-1.png?ex=67fa7a92&is=67f92912&hm=a29e840c68e99d91aabb3128c72d567fe966cc0bef866e9a0b30ad8e6cde909f&" alt="School Logo" class="school-logo">
-                <h1>โรงเรียนชุมแพศึกษา</h1>
-            </div>
-            <div class="header-right">
-                <span>ยินดีต้อนรับ, <span id="currentUserName"></span></span>
-                <div id="headerButtons" style="display: none;">
-                    <button class="btn btn-add" onclick="openAddUserModal()"><i class="fas fa-user-plus"></i> เพิ่ม</button>
-                    <button class="btn btn-change-password" onclick="openChangePasswordModal()"><i class="fas fa-key"></i> แก้ไขรหัสผ่าน</button>
-                </div>
-                <button class="btn btn-logout" id="logoutBtn" onclick="logout()" style="display: none;"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</button>
-            </div>
-        </header>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const questions = [
+            { id: 1, text: 'ข้อหาขับรถเร็วเกินกำหนดมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
+            { id: 2, text: 'ข้อหาจอดรถในที่ห้ามจอดมีค่าปรับเท่าไหร่?', answer: '400', choices: ['300', '400', '500', '200'] },
+            { id: 3, text: 'ข้อหาไม่สวมหมวกกันน็อกมีค่าปรับเท่าไหร่?', answer: '200', choices: ['100', '200', '300', '400'] },
+            { id: 4, text: 'ข้อหาฝ่าไฟแดงมีค่าปรับเท่าไหร่?', answer: '1000', choices: ['800', '1000', '1200', '600'] },
+            { id: 5, text: 'ข้อหาขับรถย้อนศรมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
+            { id: 6, text: 'ข้อหาไม่คาดเข็มขัดนิรภัยมีค่าปรับเท่าไหร่?', answer: '300', choices: ['200', '300', '400', '100'] },
+            { id: 7, text: 'ข้อหาขับรถโดยไม่มีใบขับขี่มีค่าปรับเท่าไหร่?', answer: '1000', choices: ['800', '1000', '1200', '600'] },
+            { id: 8, text: 'ข้อหาใช้โทรศัพท์ขณะขับรถมีค่าปรับเท่าไหร่?', answer: '800', choices: ['600', '800', '1000', '400'] },
+            { id: 9, text: 'ข้อหาขับรถในสภาพที่ไม่ปลอดภัยมีค่าปรับเท่าไหร่?', answer: '2000', choices: ['1500', '2000', '2500', '1000'] },
+            { id: 10, text: 'ข้อหาไม่หยุดรถให้คนข้ามถนนมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
+            { id: 11, text: 'ข้อหาขับรถขณะมึนเมามีค่าปรับสูงสุดเท่าไหร่?', answer: '10000', choices: ['8000', '10000', '12000', '5000'] },
+            { id: 12, text: 'ข้อหาไม่ติดป้ายทะเบียนมีค่าปรับเท่าไหร่?', answer: '200', choices: ['100', '200', '300', '400'] },
+            { id: 13, text: 'ข้อหาขับรถโดยไม่เปิดไฟหน้ามีค่าปรับเท่าไหร่?', answer: '300', choices: ['200', '300', '400', '100'] },
+            { id: 14, text: 'ข้อหาเปลี่ยนเลนกะทันหันมีค่าปรับเท่าไหร่?', answer: '400', choices: ['300', '400', '500', '200'] },
+            { id: 15, text: 'ข้อหาไม่ปฏิบัติตามเครื่องหมายจราจรมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
+            { id: 16, text: 'ข้อหาขับรถโดยไม่มีประกันภัยมีค่าปรับเท่าไหร่?', answer: '600', choices: ['500', '600', '700', '400'] },
+            { id: 17, text: 'ข้อหาขับรถแซงในที่ห้ามแซงมีค่าปรับเท่าไหร่?', answer: '800', choices: ['600', '800', '1000', '400'] },
+            { id: 18, text: 'ข้อหาขับรถในช่องทางเดินรถประจำทางมีค่าปรับเท่าไหร่?', answer: '1000', choices: ['800', '1000', '1200', '600'] },
+            { id: 19, text: 'ข้อหาไม่สัญญาณไฟเลี้ยวมีค่าปรับเท่าไหร่?', answer: '400', choices: ['300', '400', '500', '200'] },
+            { id: 20, text: 'ข้อหาขับรถด้วยความเร็วต่ำเกินไปมีค่าปรับเท่าไหร่?', answer: '300', choices: ['200', '300', '400', '100'] },
+            { id: 21, text: 'ข้อหาไม่ปฏิบัติตามสัญญาณจราจรมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
+            { id: 22, text: 'ข้อหาขับรถที่มีควันดำเกินกำหนดมีค่าปรับเท่าไหร่?', answer: '1000', choices: ['800', '1000', '1200', '600'] },
+            { id: 23, text: 'ข้อหาขับรถโดยไม่มีกระจกข้างมีค่าปรับเท่าไหร่?', answer: '200', choices: ['100', '200', '300', '400'] },
+            { id: 24, text: 'ข้อหาขับรถตีคู่มีค่าปรับเท่าไหร่?', answer: '400', choices: ['300', '400', '500', '200'] },
+            { id: 25, text: 'ข้อหาไม่หยุดรถที่ทางแยกมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
+            { id: 26, text: 'ข้อหาขับรถที่มีเสียงดังเกินกำหนดมีค่าปรับเท่าไหร่?', answer: '1000', choices: ['800', '1000', '1200', '600'] },
+            { id: 27, text: 'ข้อหาขับรถโดยไม่ติดตั้งเข็มขัดนิรภัยมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
+            { id: 28, text: 'ข้อหาขับรถในทางที่กีดขวางจราจรมีค่าปรับเท่าไหร่?', answer: '400', choices: ['300', '400', '500', '200'] },
+            { id: 29, text: 'ข้อหาขับรถโดยไม่คำนึงถึงความปลอดภัยมีค่าปรับเท่าไหร่?', answer: '1000', choices: ['800', '1000', '1200', '600'] },
+            { id: 30, text: 'ข้อหาไม่ปฏิบัติตามคำสั่งเจ้าพนักงานมีค่าปรับเท่าไหร่?', answer: '1000', choices: ['800', '1000', '1200', '600'] },
+            { id: 31, text: 'ข้อหาขับรถที่มีไฟท้ายชำรุดมีค่าปรับเท่าไหร่?', answer: '200', choices: ['100', '200', '300', '400'] },
+            { id: 32, text: 'ข้อหาขับรถโดยไม่มีไฟเบรกมีค่าปรับเท่าไหร่?', answer: '300', choices: ['200', '300', '400', '100'] },
+            { id: 33, text: 'ข้อหาขับรถที่มีป้ายทะเบียนบดบังมีค่าปรับเท่าไหร่?', answer: '400', choices: ['300', '400', '500', '200'] },
+            { id: 34, text: 'ข้อหาขับรถโดยไม่แสดงใบอนุญาตมีค่าปรับเท่าไหร่?', answer: '200', choices: ['100', '200', '300', '400'] },
+            { id: 35, text: 'ข้อหาขับรถโดยไม่มีไฟสัญญาณมีค่าปรับเท่าไหร่?', answer: '300', choices: ['200', '300', '400', '100'] },
+            { id: 36, text: 'ข้อหาขับรถในสภาพยางชำรุดมีค่าปรับเท่าไหร่?', answer: '400', choices: ['300', '400', '500', '200'] },
+            { id: 37, text: 'ข้อหาขับรถที่มีไฟหน้าสีไม่ถูกต้องมีค่าปรับเท่าไหร่?', answer: '200', choices: ['100', '200', '300', '400'] },
+            { id: 38, text: 'ข้อหาขับรถโดยไม่ติดตั้งกระจกมองข้างมีค่าปรับเท่าไหร่?', answer: '300', choices: ['200', '300', '400', '100'] },
+            { id: 39, text: 'ข้อหาขับรถในทางจักรยานมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
+            { id: 40, text: 'หาพี่รหัสเจอหรือยังน้าาา ขอรหัสลับหน่อย', answer: '0609', choices: ['0609', '1234', '5678', '9012'] }
+        ];
 
-        <div class="container">
-            <!-- Login Section -->
-            <div class="login-container" id="loginSection">
-                <h2>เข้าสู่ระบบ</h2>
-                <div class="form-group">
-                    <label for="username"><strong>ชื่อผู้ใช้</strong></label>
-                    <input type="text" id="username" class="form-control" placeholder="กรอกรหัสผู้ใช้">
-                </div>
-                <div class="form-group">
-                    <label for="password"><strong>รหัสผ่าน</strong></label>
-                    <input type="password" id="password" class="form-control" placeholder="กรอกรหัสผ่าน">
-                </div>
-                <button class="btn btn-login" id="loginBtn" onclick="login()">เข้าสู่ระบบ</button>
-            </div>
+        let selectedQuestions = [];
+        let currentQuestion = 0;
+        let score = { correct: 0, wrong: 0 };
+        let answers = [];
+        let wrongCount = 0;
+        let isLocked = false;
+        let lockUntil = localStorage.getItem('lockUntil') || 0;
+        let selectedChoice = null;
 
-            <!-- Student Panel -->
-            <div class="panel" id="studentPanel">
-                <div class="panel-header">
-                    <h2 class="panel-title">คะแนนพฤติกรรมของฉัน</h2>
-                </div>
-                <div id="studentInfo"></div>
-                <div class="table-container">
-                    <table id="studentScoreTable">
-                        <thead>
-                            <tr>
-                                <th>วันที่</th>
-                                <th>รายการ</th>
-                                <th>คะแนนที่เปลี่ยนแปลง</th>
-                                <th>โดย</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentScoreBody"></tbody>
-                    </table>
-                </div>
-                <div id="studentTotalScore" style="text-align: center; margin-top: 20px;"></div>
-            </div>
+        // สร้างกราฟ
+        const ctx = document.getElementById('scoreChart').getContext('2d');
+        const scoreChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['ตอบถูก', 'ตอบผิด'],
+                datasets: [{
+                    label: 'ผลลัพธ์',
+                    data: [score.correct, score.wrong],
+                    backgroundColor: ['#00f2ff', '#ff00ff'],
+                    borderColor: '#1a1a1a',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top', labels: { color: '#ffffff' } },
+                    title: { display: true, text: 'ผลลัพธ์การตอบคำถาม', color: '#ffffff' }
+                }
+            }
+        });
 
-            <!-- Teacher Panel -->
-            <div class="panel" id="teacherPanel">
-                <div class="panel-header">
-                    <h2 class="panel-title">จัดการคะแนนนักเรียน</h2>
-                </div>
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>นักเรียน</span>
-                        <i class="fas fa-chevron-right accordion-icon"></i>
-                    </div>
-                    <div class="accordion-content">
-                        <div class="form-group">
-                            <label for="teacherClassFilter">กรองตามชั้นเรียน:</label>
-                            <select id="teacherClassFilter" class="form-control" onchange="loadTeacherStudents()">
-                                <option value="">ทั้งหมด</option>
-                                <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
-                                <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
-                                <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
-                                <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
-                                <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
-                                <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="teacherSearch">ค้นหานักเรียน (ชื่อหรือรหัส):</label>
-                            <input type="text" id="teacherSearch" class="form-control" placeholder="ค้นหานักเรียน..." oninput="loadTeacherStudents()">
-                        </div>
-                        <div class="table-container">
-                            <table id="teacherStudentTable">
-                                <thead>
-                                    <tr>
-                                        <th>รหัสนักเรียน</th>
-                                        <th>ชื่อนักเรียน</th>
-                                        <th>ระดับชั้น</th>
-                                        <th>คะแนนรวม</th>
-                                        <th>การดำเนินการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="teacherStudentBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>คำขอที่รอการอนุมัติ</span>
-                        <i class="fas fa-chevron-right accordion-icon"></i>
-                    </div>
-                    <div class="accordion-content">
-                        <div id="teacherRequestsContainer"></div>
-                    </div>
-                </div>
-                <div class="accordion">
-                    <div class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>ข้อความแจ้งเตือน</span>
-                        <i class="fas fa-chevron-right accordion-icon"></i>
-                    </div>
-                    <div class="accordion-content">
-                        <div id="teacherNotificationsContainer"></div>
-                    </div>
-                </div>
-            </div>
+        // สุ่มคำถาม 9 ข้อ + ข้อ 10 ล็อก
+        function shuffleQuestions() {
+            const shuffled = [...questions.slice(0, 39)].sort(() => Math.random() - 0.5);
+            selectedQuestions = shuffled.slice(0, 9);
+            selectedQuestions.push(questions.find(q => q.id === 40)); // ล็อกข้อสุดท้าย
+        }
 
-            <!-- Admin Panel -->
-            <div class="panel" id="adminPanel">
-                <div class="panel-header">
-                    <h2 class="panel-title">ระบบจัดการผู้ดูแล</h2>
-                </div>
-                <div class="tab-container">
-                    <div class="tab-buttons">
-                        <button class="tab-btn active" onclick="openTab('adminStudents')">นักเรียน</button>
-                        <button class="tab-btn" onclick="openTab('adminTeachers')">ครู</button>
-                        <button class="tab-btn" onclick="openTab('adminPendingRequests')">คำขอที่รออนุมัติ</button>
-                        <button class="tab-btn" onclick="openTab('adminLogs')">ประวัติการเปลี่ยนแปลง</button>
-                    </div>
-                    <div id="adminStudents" class="tab-content active">
-                        <div class="form-group">
-                            <label for="adminClassFilter">กรองตามชั้นเรียน:</label>
-                            <select id="adminClassFilter" class="form-control" onchange="loadAdminStudents()">
-                                <option value="">ทั้งหมด</option>
-                                <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
-                                <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
-                                <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
-                                <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
-                                <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
-                                <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="adminSearch">ค้นหานักเรียน (ชื่อหรือรหัส):</label>
-                            <input type="text" id="adminSearch" class="form-control" placeholder="ค้นหานักเรียน..." oninput="loadAdminStudents()">
-                        </div>
-                        <div class="table-container">
-                            <table id="adminStudentTable">
-                                <thead>
-                                    <tr>
-                                        <th>รหัสนักเรียน</th>
-                                        <th>ชื่อนักเรียน</th>
-                                        <th>ระดับชั้น</th>
-                                        <th>คะแนนรวม</th>
-                                        <th>การดำเนินการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="adminStudentBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div id="adminTeachers" class="tab-content">
-                        <div class="table-container">
-                            <table id="adminTeacherTable">
-                                <thead>
-                                    <tr>
-                                        <th>รหัสครู</th>
-                                        <th>ชื่อครู</th>
-                                        <th>การดำเนินการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="adminTeacherBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div id="adminPendingRequests" class="tab-content">
-                        <div id="adminRequestsContainer"></div>
-                    </div>
-                    <div id="adminLogs" class="tab-content">
-                        <div id="adminLogsContainer" style="max-height: 500px; overflow-y: auto;"></div>
-                    </div>
-                </div>
-            </div>
+        // สุ่มตัวเลือก
+        function shuffleChoices(choices) {
+            return [...choices].sort(() => Math.random() - 0.5);
+        }
 
-            <!-- Modals -->
-            <div id="addScoreModal" class="modal">
-                <div class="modal-content">
-                    <span class="close" onclick="closeModal('addScoreModal')">×</span>
-                    <h2>เพิ่ม/ลดคะแนนนักเรียน</h2>
-                    <div class="form-group">
-                        <label for="scoreStudentId">นักเรียน</label>
-                        <select id="scoreStudentId" class="form-control"></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="scoreClass">ระดับชั้น</label>
-                        <select id="scoreClass" class="form-control">
-                            <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
-                            <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
-                            <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
-                            <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
-                            <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
-                            <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>จำนวนคะแนน</label>
-                        <div class="score-controls">
-                            <button class="btn btn-increase" onclick="setScoreValue(1)"><i class="fas fa-plus"></i> เพิ่ม</button>
-                            <button class="btn btn-decrease" onclick="setScoreValue(-1)"><i class="fas fa-minus"></i> ลด</button>
-                            <input type="number" id="scoreChange" class="form-control score-input" placeholder="เช่น 5 หรือ -3" value="1">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="scoreReason">เหตุผล</label>
-                        <input type="text" id="scoreReason" class="form-control" placeholder="เช่น มาโรงเรียนสาย, ช่วยเหลือเพื่อน">
-                    </div>
-                    <button class="btn" onclick="submitScoreRequest()"><i class="fas fa-paper-plane"></i> ส่งคำขอ</button>
-                </div>
-            </div>
+        // แสดงคำถามและตัวเลือก
+        function showQuestion() {
+            if (isLocked) {
+                updateLockMessage();
+                return;
+            }
+            if (currentQuestion < selectedQuestions.length) {
+                const q = selectedQuestions[currentQuestion];
+                document.getElementById('question').innerText = `ข้อ ${currentQuestion + 1}: ${q.text}`;
+                const choicesDiv = document.getElementById('choices');
+                choicesDiv.innerHTML = '';
+                const shuffledChoices = shuffleChoices(q.choices);
+                shuffledChoices.forEach(choice => {
+                    const choiceBtn = document.createElement('div');
+                    choiceBtn.className = 'choice';
+                    choiceBtn.innerText = choice;
+                    choiceBtn.onclick = () => selectChoice(choiceBtn, choice);
+                    choicesDiv.appendChild(choiceBtn);
+                });
+                document.getElementById('result').innerText = '';
+                document.getElementById('quizContainer').classList.remove('hidden');
+                document.getElementById('resultContainer').classList.add('hidden');
+                selectedChoice = null;
+                document.getElementById('submitButton').disabled = true;
+            } else {
+                document.getElementById('quizContainer').classList.add('hidden');
+                document.getElementById('resultContainer').classList.remove('hidden');
+                document.getElementById('score').innerText = `คุณตอบถูก ${score.correct} ข้อ, ผิด ${score.wrong} ข้อ`;
+                document.getElementById('lockMessage').innerText = '';
+                document.getElementById('resetButton').style.display = 'none';
+            }
+        }
 
-            <div id="addUserModal" class="modal">
-                <div class="modal-content">
-                    <span class="close" onclick="closeModal('addUserModal')">×</span>
-                    <h2>เพิ่มผู้ใช้ใหม่</h2>
-                    <div class="form-group">
-                        <label for="newUserType">ประเภทผู้ใช้</label>
-                        <select id="newUserType" class="form-control" onchange="toggleClassField()">
-                            <option value="student">นักเรียน</option>
-                            <option value="teacher">ครู</option>
-                            <option value="admin">ผู้บริหาร</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="newUserId">รหัสผู้ใช้</label>
-                        <input type="text" id="newUserId" class="form-control" placeholder="เช่น 64001 สำหรับนักเรียน">
-                    </div>
-                    <div class="form-group">
-                        <label for="newUserName">ชื่อ-สกุล</label>
-                        <input type="text" id="newUserName" class="form-control" placeholder="ชื่อผู้ใช้">
-                    </div>
-                    <div class="form-group" id="newUserClassGroup">
-                        <label for="newUserClass">ระดับชั้น (สำหรับนักเรียน)</label>
-                        <select id="newUserClass" class="form-control">
-                            <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
-                            <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
-                            <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
-                            <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
-                            <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
-                            <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="newUserSubClassGroup">
-                        <label for="newUserSubClass">ห้องเรียนย่อย (เช่น 1 สำหรับ ม.1/1)</label>
-                        <input type="text" id="newUserSubClass" class="form-control" placeholder="เช่น 1, 2, 3...">
-                    </div>
-                    <div class="form-group">
-                        <label for="newUserPassword">รหัสผ่าน</label>
-                        <input type="password" id="newUserPassword" class="form-control" placeholder="รหัสผ่าน">
-                    </div>
-                    <button class="btn" onclick="addNewUser()"><i class="fas fa-user-plus"></i> เพิ่มผู้ใช้</button>
-                </div>
-            </div>
+        // เลือกตัวเลือก
+        function selectChoice(btn, choice) {
+            document.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedChoice = choice;
+            document.getElementById('submitButton').disabled = false;
+        }
 
-            <div id="editUserModal" class="modal">
-                <div class="modal-content">
-                    <span class="close" onclick="closeModal('editUserModal')">×</span>
-                    <h2>แก้ไขข้อมูลผู้ใช้</h2>
-                    <div class="form-group">
-                        <label for="editUserId">รหัสผู้ใช้</label>
-                        <input type="text" id="editUserId" class="form-control" disabled>
-                    </div>
-                    <div class="form-group">
-                        <label for="editUserName">ชื่อ-สกุล</label>
-                        <input type="text" id="editUserName" class="form-control">
-                    </div>
-                    <div class="form-group" id="editUserClassGroup">
-                        <label for="editUserClass">ระดับชั้น</label>
-                        <select id="editUserClass" class="form-control">
-                            <option value="ม.1">มัธยมศึกษาปีที่ 1</option>
-                            <option value="ม.2">มัธยมศึกษาปีที่ 2</option>
-                            <option value="ม.3">มัธยมศึกษาปีที่ 3</option>
-                            <option value="ม.4">มัธยมศึกษาปีที่ 4</option>
-                            <option value="ม.5">มัธยมศึกษาปีที่ 5</option>
-                            <option value="ม.6">มัธยมศึกษาปีที่ 6</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="editUserSubClassGroup">
-                        <label for="editUserSubClass">ห้องเรียนย่อย</label>
-                        <input type="text" id="editUserSubClass" class="form-control" placeholder="เช่น 1, 2, 3...">
-                    </div>
-                    <div class="form-group">
-                        <label for="editUserPassword">รหัสผ่านใหม่ (เว้นว่างหากไม่ต้องการเปลี่ยน)</label>
-                        <input type="password" id="editUserPassword" class="form-control">
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                        <button class="btn btn-edit" onclick="updateUser()"><i class="fas fa-save"></i> บันทึก</button>
-                        <button class="btn btn-remove" onclick="deleteUser()"><i class="fas fa-trash"></i> ลบ</button>
-                    </div>
-                </div>
-            </div>
+        // ตรวจคำตอบ
+        function checkAnswer() {
+            if (isLocked || !selectedChoice) return;
+            const correctAnswer = selectedQuestions[currentQuestion].answer.toString();
+            const isCorrect = selectedChoice === correctAnswer;
+            answers.push({
+                question: selectedQuestions[currentQuestion].text,
+                userAnswer: selectedChoice,
+                isCorrect
+            });
+            if (isCorrect) {
+                score.correct++;
+                document.getElementById('result').innerText = 'ถูกต้อง!';
+                document.getElementById('result').className = 'correct';
+            } else {
+                score.wrong++;
+                wrongCount++;
+                document.getElementById('result').innerText = 'ผิด!';
+                document.getElementById('result').className = 'wrong';
+            }
+            scoreChart.data.datasets[0].data = [score.correct, score.wrong];
+            scoreChart.update();
 
-            <div id="approvalModal" class="modal">
-                <div class="modal-content">
-                    <span class="close" onclick="closeModal('approvalModal')">×</span>
-                    <h2>อนุมัติคำขอเปลี่ยนแปลงคะแนน</h2>
-                    <div id="requestDetails"></div>
-                    <div class="form-group">
-                        <label for="approvalComment">ความคิดเห็น (ไม่จำเป็น)</label>
-                        <textarea id="approvalComment" class="form-control" rows="3" placeholder="เพิ่มความคิดเห็น..."></textarea>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                        <button class="btn btn-approve" onclick="approveRequest(true)"><i class="fas fa-check"></i> อนุมัติ</button>
-                        <button class="btn btn-reject" onclick="approveRequest(false)"><i class="fas fa-times"></i> ไม่อนุมัติ</button>
-                    </div>
-                </div>
-            </div>
+            if (wrongCount > 3) {
+                isLocked = true;
+                lockUntil = Date.now() + 30 * 60 * 1000; // ล็อก 30 นาที
+                localStorage.setItem('lockUntil', lockUntil);
+                document.getElementById('resetButton').style.display = 'block';
+                updateLockMessage();
+                return;
+            }
 
-            <div id="changePasswordModal" class="modal">
-                <div class="modal-content">
-                    <span class="close" onclick="closeModal('changePasswordModal')">×</span>
-                    <h2>เปลี่ยนรหัสผ่านผู้บริหาร</h2>
-                    <div class="form-group">
-                        <label for="adminSecurityCode">รหัสยืนยัน</label>
-                        <input type="password" id="adminSecurityCode" class="form-control" placeholder="กรอกรหัสยืนยัน">
-                    </div>
-                    <div class="form-group">
-                        <label for="newAdminPassword">รหัสผ่านใหม่</label>
-                        <input type="password" id="newAdminPassword" class="form-control" placeholder="รหัสผ่านใหม่">
-                    </div>
-                    <div class="form-group">
-                        <label for="confirmAdminPassword">ยืนยันรหัสผ่านใหม่</label>
-                        <input type="password" id="confirmAdminPassword" class="form-control" placeholder="ยืนยันรหัสผ่านใหม่">
-                    </div>
-                    <button class="btn" onclick="changeAdminPassword()"><i class="fas fa-key"></i> เปลี่ยนรหัสผ่าน</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script src="script.js"></script>
+            currentQuestion++;
+            setTimeout(showQuestion, 1000);
+        }
+
+        // อัพเดตข้อความล็อก
+        function updateLockMessage() {
+            const now = Date.now();
+            if (now < lockUntil) {
+                const remaining = Math.ceil((lockUntil - now) / 1000 / 60);
+                document.getElementById('quizContainer').classList.add('hidden');
+                document.getElementById('resultContainer').classList.add('hidden');
+                document.getElementById('lockMessage').innerText = `ล็อกควิซ! รอ ${remaining} นาที หรือกดรีเซ็ต`;
+                document.getElementById('resetButton').style.display = 'block';
+            } else {
+                isLocked = false;
+                localStorage.removeItem('lockUntil');
+                document.getElementById('quizContainer').classList.remove('hidden');
+                document.getElementById('lockMessage').innerText = '';
+                document.getElementById('resetButton').style.display = 'none';
+                showQuestion();
+            }
+        }
+
+        // รีเซ็ตคูลดาวน์
+        function resetCooldown() {
+            isLocked = false;
+            lockUntil = 0;
+            wrongCount = 0;
+            localStorage.removeItem('lockUntil');
+            currentQuestion = 0;
+            score.correct = 0;
+            score.wrong = 0;
+            answers = [];
+            shuffleQuestions();
+            scoreChart.data.datasets[0].data = [0, 0];
+            scoreChart.update();
+            updateLockMessage();
+        }
+
+        // รีสตาร์ทควิซ
+        function restartQuiz() {
+            currentQuestion = 0;
+            score.correct = 0;
+            score.wrong = 0;
+            wrongCount = 0;
+            answers = [];
+            shuffleQuestions();
+            scoreChart.data.datasets[0].data = [0, 0];
+            scoreChart.update();
+            showQuestion();
+        }
+
+        // เริ่มควิซ
+        if (Date.now() < lockUntil) {
+            isLocked = true;
+            updateLockMessage();
+        } else {
+            shuffleQuestions();
+            showQuestion();
+        }
+    </script>
 </body>
 </html>
