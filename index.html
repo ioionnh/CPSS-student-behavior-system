@@ -6,13 +6,12 @@
     <title>พี่หลอนยา</title>
     <style>
         body {
-            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            background: #1a1a1a; /* สีพื้นดำ */
             color: #ffffff;
             font-family: 'Orbitron', sans-serif;
             margin: 0;
             padding: 10px;
             overflow-x: hidden;
-            animation: neonFlicker 5s infinite;
         }
         .container {
             max-width: 100%;
@@ -21,18 +20,18 @@
             padding: 10px;
         }
         h1 {
-            color: #00f2ff;
-            text-shadow: 0 0 15px #00f2ff, 0 0 30px #ff00ff;
+            color: #ffffff;
+            text-shadow: 0 0 15px #1e3a8a, 0 0 30px #d4af37; /* น้ำเงิน-ทอง */
             font-size: 1.8em;
             animation: glow 2s infinite alternate;
             margin: 10px 0;
         }
         .intro-container, .quiz-container, .result-container {
-            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.8), rgba(212, 175, 55, 0.8)); /* น้ำเงิน-ทองโปร่งแสง */
             padding: 15px;
-            border: 2px solid #ff00ff;
+            border: 2px solid #d4af37;
             border-radius: 10px;
-            box-shadow: 0 0 20px #ff00ff;
+            box-shadow: 0 0 20px #1e3a8a;
             margin-bottom: 15px;
             animation: slideIn 0.5s;
         }
@@ -45,9 +44,9 @@
         .choice {
             padding: 12px;
             font-size: 1em;
-            background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
+            background: linear-gradient(45deg, #1e3a8a, #2a4365); /* น้ำเงินเข้ม */
             color: #ffffff;
-            border: 2px solid #00f2ff;
+            border: 2px solid #d4af37;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
@@ -55,24 +54,24 @@
             touch-action: manipulation;
         }
         .choice:hover {
-            background: linear-gradient(45deg, #ff00ff, #00f2ff);
-            color: #1a1a1a;
-            box-shadow: 0 0 15px #ff00ff;
+            background: linear-gradient(45deg, #d4af37, #f3f4f6); /* ทอง-เทาอ่อน */
+            color: #1e3a8a;
+            box-shadow: 0 0 15px #d4af37;
             transform: translateY(-3px);
         }
         .choice.selected {
-            background: linear-gradient(45deg, #00f2ff, #ff00ff);
-            color: #1a1a1a;
-            border-color: #ff00ff;
+            background: linear-gradient(45deg, #d4af37, #f3f4f6);
+            color: #1e3a8a;
+            border-color: #1e3a8a;
             animation: none;
         }
         input {
             padding: 12px;
             margin: 10px 0;
             font-size: 1em;
-            background-color: #1a1a1a;
+            background-color: #1e3a8a;
             color: #ffffff;
-            border: 2px solid #00f2ff;
+            border: 2px solid #d4af37;
             border-radius: 8px;
             width: 90%;
             max-width: 200px;
@@ -80,27 +79,29 @@
             animation: shake 3s infinite;
         }
         input:focus {
-            border-color: #ff00ff;
-            box-shadow: 0 0 10px #ff00ff;
+            border-color: #f3f4f6;
+            box-shadow: 0 0 10px #d4af37;
             outline: none;
             animation: none;
         }
         button {
             padding: 12px 24px;
             font-size: 1em;
-            background: linear-gradient(45deg, #a100ff, #00ff00);
-            color: #1a1a1a;
+            background: linear-gradient(45deg, #1e3a8a, #2a4365); /* น้ำเงินเข้ม */
+            color: #ffffff;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 0 15px #ff00ff;
+            box-shadow: 0 0 15px #d4af37;
             transition: transform 0.3s, box-shadow 0.3s;
             animation: pulse 2s infinite;
             touch-action: manipulation;
         }
         button:hover {
+            background: linear-gradient(45deg, #d4af37, #f3f4f6);
+            color: #1e3a8a;
             transform: scale(1.05);
-            box-shadow: 0 0 20px #00f2ff;
+            box-shadow: 0 0 20px #1e3a8a;
             animation: none;
         }
         button:disabled {
@@ -116,16 +117,52 @@
             animation: fadeIn 0.5s;
         }
         #result.correct {
-            background: linear-gradient(45deg, #00f2ff, #1a1a1a);
+            background: linear-gradient(45deg, #d4af37, #1e3a8a);
             color: #ffffff;
         }
         #result.wrong {
-            background: linear-gradient(45deg, #ff00ff, #1a1a1a);
+            background: linear-gradient(45deg, #7f1d1d, #1e3a8a); /* แดงเข้ม */
             color: #ffffff;
         }
         #lockMessage {
-            color: #ff00ff;
+            color: #d4af37;
             font-size: 1em;
+            margin: 20px 0;
+            animation: flash 1s infinite;
+        }
+        #resetContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        #resetInput {
+            padding: 10px;
+            font-size: 1em;
+            background-color: #1e3a8a;
+            color: #ffffff;
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 150px;
+            animation: shake 3s infinite;
+        }
+        #resetInput:focus {
+            border-color: #f3f4f6;
+            box-shadow: 0 0 10px #d4af37;
+            outline: none;
+            animation: none;
+        }
+        #resetButton {
+            padding: 10px 20px;
+            font-size: 1em;
+            width: 90%;
+            max-width: 150px;
+        }
+        #resetResult {
+            color: #7f1d1d;
+            font-size: 0.9em;
             margin-top: 10px;
             animation: flash 1s infinite;
         }
@@ -138,25 +175,21 @@
             animation: slideFromLeft 1s;
         }
         a {
-            color: #00ff00;
+            color: #d4af37;
             text-decoration: none;
             transition: color 0.3s;
             animation: glowText 2s infinite alternate;
         }
         a:hover {
-            color: #ff00ff;
-            text-shadow: 0 0 10px #ff00ff;
+            color: #f3f4f6;
+            text-shadow: 0 0 10px #d4af37;
         }
         .hidden {
             display: none;
         }
-        @keyframes neonFlicker {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.9; }
-        }
         @keyframes glow {
-            from { text-shadow: 0 0 10px #00f2ff, 0 0 20px #ff00ff; }
-            to { text-shadow: 0 0 20px #00f2ff, 0 0 30px #ff00ff; }
+            from { text-shadow: 0 0 10px #1e3a8a, 0 0 20px #d4af37; }
+            to { text-shadow: 0 0 20px #1e3a8a, 0 0 30px #d4af37; }
         }
         @keyframes slideIn {
             from { transform: translateY(50px); opacity: 0; }
@@ -185,14 +218,15 @@
             50% { opacity: 0.5; }
         }
         @keyframes glowText {
-            from { text-shadow: 0 0 5px #00ff00; }
-            to { text-shadow: 0 0 10px #ff00ff; }
+            from { text-shadow: 0 0 5px #d4af37; }
+            to { text-shadow: 0 0 10px #1e3a8a; }
         }
         @media (max-width: 600px) {
             h1 { font-size: 1.5em; }
             .intro-container, .quiz-container, .result-container { padding: 10px; }
             .choice, input, button { font-size: 0.9em; }
-            input { width: 85%; }
+            input, #resetInput { width: 85%; }
+            #resetButton { width: 85%; }
         }
     </style>
 </head>
@@ -200,7 +234,7 @@
     <div class="container">
         <h1>พี่หลอนยา</h1>
         <div id="introContainer" class="intro-container">
-            <p>ถ้าตอบถูกจะได้คำใบ้ข้อละ 1 คำใบ้ แต่ๆๆ ถ้าตอบผิดเกินสามคำถามรอไปน่ะจ้ะะ</p>
+            <p>ถ้าตอบถูกจะได้คำใบ้ข้อละ 1 คำใบ้ แต่ๆๆ ถ้าตอบผิดเกิน3คำถามก็รอไปน่ะจ้ะะ</p>
             <button onclick="startQuiz()" aria-label="เริ่มตอบคำถาม">เริ่มตอบ</button>
         </div>
         <div id="quizContainer" class="quiz-container hidden">
@@ -212,7 +246,11 @@
         </div>
         <div id="result"></div>
         <div id="lockMessage"></div>
-        <button onclick="resetCooldown()" style="display: none;" id="resetButton" aria-label="รีเซ็ตคูลดาวน์">รีเซ็ตคูลดาวน์</button>
+        <div id="resetContainer" class="hidden">
+            <input type="text" id="resetInput" placeholder="ใส่รหัส 4 หลัก" aria-label="กรอกรหัสเพื่อรีเซ็ต">
+            <button onclick="resetCooldown()" id="resetButton" aria-label="รีเซ็ตคูลดาวน์">รีเซ็ตคูลดาวน์</button>
+            <div id="resetResult"></div>
+        </div>
         <div id="resultContainer" class="result-container hidden">
             <p id="score"></p>
             <p id="finalResult">LAW | RU ⚖️ อะไรน้าาา 🤫 และ <a href="https://www.instagram.com/21_txwxttxw" target="_blank">@21_txwxttxw</a></p>
@@ -246,14 +284,14 @@
                 text: 'A1 = 7,24,41,58,75,.....????', 
                 answer: '92', 
                 choices: ['71', '92', '58'], 
-                hint: 'สมการนี้ทำไมแปลกรหัสหรือป่าววน่าหรือไม่ใช่นะ' 
+                hint: 'สมการนี้คืออะไรน้าาอย่าไปคิดมาก' 
             },
             { 
                 id: 4, 
                 text: 'ไม่มีอะไรจะบอกแล้วววว', 
                 answer: null, 
                 choices: [], 
-                hint: 'ขอให้โชคดีนะ ขอให้เจอพี่รหัสกับ ?ลุง? หรือป้านะ' 
+                hint: 'ขอให้โชคดีนะ ขอให้เจอพี่รหัสกับลุง หรือป้านะ?' 
             },
             { 
                 id: 5, 
@@ -275,6 +313,7 @@
         function startQuiz() {
             document.getElementById('introContainer').classList.add('hidden');
             document.getElementById('quizContainer').classList.remove('hidden');
+            document.getElementById('resetContainer').classList.add('hidden');
             showQuestion();
         }
 
@@ -325,7 +364,7 @@
                     answerInput.classList.add('hidden');
                     submitButton.classList.add('hidden');
                     nextButton.classList.remove('hidden');
-                    document.getElementById('result').innerText = `คำใบ้: ${q.hint}\nก็กดไปเลยสิ!!!`;
+                    typeWriter(`คำใบ้: ${q.hint}\nอ่านคำใบ้นี้แล้วยังซื่อบื้ออยู่อีกกดถัดไปสิ!`, 'result');
                 }
 
                 document.getElementById('quizContainer').classList.remove('hidden');
@@ -335,7 +374,7 @@
                 document.getElementById('resultContainer').classList.remove('hidden');
                 document.getElementById('score').innerText = `ตอบถูก: ${score.correct} ข้อ, ตอบผิด: ${score.wrong} ข้อ`;
                 document.getElementById('lockMessage').innerText = '';
-                document.getElementById('resetButton').style.display = 'none';
+                document.getElementById('resetContainer').classList.add('hidden');
             }
         }
 
@@ -374,14 +413,14 @@
 
             if (isCorrect) {
                 score.correct++;
-                document.getElementById('result').innerText = `ถูกไปก็ไม่ได้ใจเขาหรอก: ${q.hint}`;
+                typeWriter(`ถูกไปก็ไม่ได้ใจเขาหรอก! คำใบ้: ${q.hint}`, 'result');
                 document.getElementById('result').className = 'correct';
                 submitButton.classList.add('hidden');
                 nextButton.classList.remove('hidden');
             } else {
                 score.wrong++;
                 wrongCount++;
-                document.getElementById('result').innerText = 'ว้ายยยไม่ถูก';
+                document.getElementById('result').innerText = 'ว้ายยยผิด!';
                 document.getElementById('result').className = 'wrong';
                 submitButton.classList.remove('hidden');
                 nextButton.classList.add('hidden');
@@ -391,7 +430,6 @@
                 isLocked = true;
                 lockUntil = Date.now() + 20 * 60 * 1000; // ล็อก 20 นาที
                 localStorage.setItem('lockUntil', lockUntil);
-                document.getElementById('resetButton').style.display = 'block';
                 updateLockMessage();
                 return;
             }
@@ -412,32 +450,41 @@
                 document.getElementById('quizContainer').classList.add('hidden');
                 document.getElementById('resultContainer').classList.add('hidden');
                 document.getElementById('introContainer').classList.add('hidden');
-                document.getElementById('lockMessage').innerText = `ล็อกควิซ! รอ ${remaining} นาที หรือกดรีเซ็ต`;
-                document.getElementById('resetButton').style.display = 'block';
+                document.getElementById('lockMessage').innerText = `ล็อกควิซ! รอ ${remaining} นาที หรือกรอกรหัสเพื่อรีเซ็ต`;
+                document.getElementById('resetContainer').classList.remove('hidden');
+                document.getElementById('resetResult').innerText = '';
             } else {
                 isLocked = false;
                 localStorage.removeItem('lockUntil');
                 document.getElementById('introContainer').classList.remove('hidden');
                 document.getElementById('lockMessage').innerText = '';
-                document.getElementById('resetButton').style.display = 'none';
+                document.getElementById('resetContainer').classList.add('hidden');
             }
         }
 
         // รีเซ็ตคูลดาวน์
         function resetCooldown() {
-            isLocked = false;
-            lockUntil = 0;
-            wrongCount = 0;
-            localStorage.removeItem('lockUntil');
-            currentQuestion = 0;
-            score.correct = 0;
-            score.wrong = 0;
-            answers = [];
-            document.getElementById('introContainer').classList.remove('hidden');
-            document.getElementById('quizContainer').classList.add('hidden');
-            document.getElementById('resultContainer').classList.add('hidden');
-            document.getElementById('lockMessage').innerText = '';
-            document.getElementById('resetButton').style.display = 'none';
+            const resetInput = document.getElementById('resetInput').value.trim();
+            const resetResult = document.getElementById('resetResult');
+            if (resetInput === '0609') {
+                isLocked = false;
+                lockUntil = 0;
+                wrongCount = 0;
+                localStorage.removeItem('lockUntil');
+                currentQuestion = 0;
+                score.correct = 0;
+                score.wrong = 0;
+                answers = [];
+                document.getElementById('introContainer').classList.remove('hidden');
+                document.getElementById('quizContainer').classList.add('hidden');
+                document.getElementById('resultContainer').classList.add('hidden');
+                document.getElementById('lockMessage').innerText = '';
+                document.getElementById('resetContainer').classList.add('hidden');
+                document.getElementById('resetInput').value = '';
+                resetResult.innerText = '';
+            } else {
+                resetResult.innerText = 'รหัสผิด!';
+            }
         }
 
         // รีสตาร์ทควิซ
@@ -450,6 +497,21 @@
             document.getElementById('introContainer').classList.remove('hidden');
             document.getElementById('quizContainer').classList.add('hidden');
             document.getElementById('resultContainer').classList.add('hidden');
+            document.getElementById('resetContainer').classList.add('hidden');
+        }
+
+        // Typewriter Effect
+        function typeWriter(text, elementId, speed = 50) {
+            let i = 0;
+            document.getElementById(elementId).innerText = '';
+            function type() {
+                if (i < text.length) {
+                    document.getElementById(elementId).innerText += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
         }
 
         // เริ่มต้น
