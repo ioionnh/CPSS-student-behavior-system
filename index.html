@@ -3,82 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LawQuizCool v2 - ทายปัญหากฎหมายสุดเท่</title>
+    <title>พี่หลอนยา</title>
     <style>
         body {
             background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
             color: #ffffff;
             font-family: 'Orbitron', sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             overflow-x: hidden;
+            animation: neonFlicker 5s infinite;
         }
         .container {
-            max-width: 800px;
+            max-width: 100%;
             margin: 0 auto;
             text-align: center;
+            padding: 10px;
         }
         h1 {
             color: #00f2ff;
             text-shadow: 0 0 15px #00f2ff, 0 0 30px #ff00ff;
-            font-size: 2.5em;
+            font-size: 1.8em;
             animation: glow 2s infinite alternate;
+            margin: 10px 0;
         }
-        .quiz-container, .result-container {
+        .intro-container, .quiz-container, .result-container {
             background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-            padding: 20px;
+            padding: 15px;
             border: 2px solid #ff00ff;
-            border-radius: 15px;
+            border-radius: 10px;
             box-shadow: 0 0 20px #ff00ff;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             animation: slideIn 0.5s;
         }
         .choices {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            display: flex;
+            flex-direction: column;
             gap: 10px;
             margin: 10px 0;
         }
         .choice {
             padding: 12px;
-            font-size: 1.1em;
+            font-size: 1em;
             background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
             color: #ffffff;
             border: 2px solid #00f2ff;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
+            animation: pulse 2s infinite;
+            touch-action: manipulation;
         }
         .choice:hover {
             background: linear-gradient(45deg, #ff00ff, #00f2ff);
             color: #1a1a1a;
             box-shadow: 0 0 15px #ff00ff;
+            transform: translateY(-3px);
         }
         .choice.selected {
             background: linear-gradient(45deg, #00f2ff, #ff00ff);
             color: #1a1a1a;
             border-color: #ff00ff;
+            animation: none;
+        }
+        input {
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 1em;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            border: 2px solid #00f2ff;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 200px;
+            transition: border 0.3s;
+            animation: shake 3s infinite;
+        }
+        input:focus {
+            border-color: #ff00ff;
+            box-shadow: 0 0 10px #ff00ff;
+            outline: none;
+            animation: none;
         }
         button {
             padding: 12px 24px;
-            font-size: 1.1em;
-            background: linear-gradient(45deg, #ff00ff, #00f2ff);
+            font-size: 1em;
+            background: linear-gradient(45deg, #a100ff, #00ff00);
             color: #1a1a1a;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             box-shadow: 0 0 15px #ff00ff;
             transition: transform 0.3s, box-shadow 0.3s;
+            animation: pulse 2s infinite;
+            touch-action: manipulation;
         }
         button:hover {
-            transform: scale(1.1);
+            transform: scale(1.05);
             box-shadow: 0 0 20px #00f2ff;
+            animation: none;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            animation: none;
         }
         #result {
-            margin-top: 20px;
+            margin-top: 10px;
             padding: 10px;
             border-radius: 8px;
-            font-size: 1.2em;
+            font-size: 1em;
+            animation: fadeIn 0.5s;
         }
         #result.correct {
             background: linear-gradient(45deg, #00f2ff, #1a1a1a);
@@ -90,20 +125,23 @@
         }
         #lockMessage {
             color: #ff00ff;
-            font-size: 1.2em;
-            margin-top: 20px;
+            font-size: 1em;
+            margin-top: 10px;
+            animation: flash 1s infinite;
         }
-        canvas {
-            margin-top: 20px;
-            background-color: #2a2a2a;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px #00f2ff;
+        #score {
+            font-size: 1.2em;
+            animation: slideFromLeft 1s;
+        }
+        #finalResult {
+            font-size: 1em;
+            animation: slideFromLeft 1s;
         }
         a {
-            color: #00f2ff;
+            color: #00ff00;
             text-decoration: none;
             transition: color 0.3s;
+            animation: glowText 2s infinite alternate;
         }
         a:hover {
             color: #ff00ff;
@@ -111,6 +149,10 @@
         }
         .hidden {
             display: none;
+        }
+        @keyframes neonFlicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
         }
         @keyframes glow {
             from { text-shadow: 0 0 10px #00f2ff, 0 0 20px #ff00ff; }
@@ -120,114 +162,120 @@
             from { transform: translateY(50px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+            20%, 40%, 60%, 80% { transform: translateX(3px); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideFromLeft {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        @keyframes glowText {
+            from { text-shadow: 0 0 5px #00ff00; }
+            to { text-shadow: 0 0 10px #ff00ff; }
+        }
         @media (max-width: 600px) {
-            h1 { font-size: 1.8em; }
-            .choices { grid-template-columns: 1fr; }
-            .choice { font-size: 1em; }
+            h1 { font-size: 1.5em; }
+            .intro-container, .quiz-container, .result-container { padding: 10px; }
+            .choice, input, button { font-size: 0.9em; }
+            input { width: 85%; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>LawQuizCool v2 - ทายปัญหากฎหมายสุดเท่</h1>
-        <div id="quizContainer" class="quiz-container">
+        <h1>พี่หลอนยา</h1>
+        <div id="introContainer" class="intro-container">
+            <p>ถ้าตอบถูกจะได้คำใบ้ข้อละ 1 คำใบ้ แต่ๆๆ ถ้าตอบผิดเกินสามคำถามรอไปน่ะจ้ะะ</p>
+            <button onclick="startQuiz()" aria-label="เริ่มตอบคำถาม">เริ่มตอบ</button>
+        </div>
+        <div id="quizContainer" class="quiz-container hidden">
             <p id="question"></p>
             <div id="choices" class="choices"></div>
-            <button onclick="checkAnswer()" id="submitButton">ยืนยันคำตอบ</button>
+            <input type="text" id="answerInput" placeholder="ใส่เลขลับ 4 หลัก" class="hidden" aria-label="กรอกเลขลับ">
+            <button onclick="checkAnswer()" id="submitButton" class="hidden" aria-label="ยืนยันคำตอบ">ยืนยันคำตอบ</button>
+            <button onclick="nextQuestion()" id="nextButton" class="hidden" aria-label="ไปข้อถัดไป">ข้อถัดไป</button>
         </div>
         <div id="result"></div>
         <div id="lockMessage"></div>
-        <button onclick="resetCooldown()" style="display: none;" id="resetButton">รีเซ็ตคูลดาวน์</button>
+        <button onclick="resetCooldown()" style="display: none;" id="resetButton" aria-label="รีเซ็ตคูลดาวน์">รีเซ็ตคูลดาวน์</button>
         <div id="resultContainer" class="result-container hidden">
             <p id="score"></p>
-            <p id="finalResult"><strong>เฉลย:</strong> ลุงรหัสชอบกฎหมาย! ใบโอคือพี่รหัสที่ซ่อนรหัสลับ 0609 ไว้! ไปดูหน้า IG <a href="https://www.instagram.com/ThaiTrafficLaw" target="_blank">@ThaiTrafficLaw</a> เพื่อหาไอเดียเกี่ยวกับใบสั่งจราจรเพิ่มเติม!</p>
-            <button onclick="restartQuiz()">เล่นควิซใหม่</button>
+            <p id="finalResult">LAW | RU ⚖️ อะไรน้าาา 🤫 และ <a href="https://www.instagram.com/21_txwxttxw" target="_blank">@21_txwxttxw</a></p>
+            <button onclick="restartQuiz()" aria-label="เล่นควิซใหม่">เล่นควิซใหม่</button>
         </div>
-        <canvas id="scoreChart"></canvas>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const questions = [
-            { id: 1, text: 'ข้อหาขับรถเร็วเกินกำหนดมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
-            { id: 2, text: 'ข้อหาจอดรถในที่ห้ามจอดมีค่าปรับเท่าไหร่?', answer: '400', choices: ['300', '400', '500', '200'] },
-            { id: 3, text: 'ข้อหาไม่สวมหมวกกันน็อกมีค่าปรับเท่าไหร่?', answer: '200', choices: ['100', '200', '300', '400'] },
-            { id: 4, text: 'ข้อหาฝ่าไฟแดงมีค่าปรับเท่าไหร่?', answer: '1000', choices: ['800', '1000', '1200', '600'] },
-            { id: 5, text: 'ข้อหาขับรถย้อนศรมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
-            { id: 6, text: 'ข้อหาไม่คาดเข็มขัดนิรภัยมีค่าปรับเท่าไหร่?', answer: '300', choices: ['200', '300', '400', '100'] },
-            { id: 7, text: 'ข้อหาขับรถโดยไม่มีใบขับขี่มีค่าปรับเท่าไหร่?', answer: '1000', choices: ['800', '1000', '1200', '600'] },
-            { id: 8, text: 'ข้อหาใช้โทรศัพท์ขณะขับรถมีค่าปรับเท่าไหร่?', answer: '800', choices: ['600', '800', '1000', '400'] },
-            { id: 9, text: 'ข้อหาขับรถในสภาพที่ไม่ปลอดภัยมีค่าปรับเท่าไหร่?', answer: '2000', choices: ['1500', '2000', '2500', '1000'] },
-            { id: 10, text: 'ข้อหาไม่หยุดรถให้คนข้ามถนนมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
-            { id: 11, text: 'ข้อหาขับรถขณะมึนเมามีค่าปรับสูงสุดเท่าไหร่?', answer: '10000', choices: ['8000', '10000', '12000', '5000'] },
-            { id: 12, text: 'ข้อหาไม่ติดป้ายทะเบียนมีค่าปรับเท่าไหร่?', answer: '200', choices: ['100', '200', '300', '400'] },
-            { id: 13, text: 'ข้อหาขับรถโดยไม่เปิดไฟหน้ามีค่าปรับเท่าไหร่?', answer: '300', choices: ['200', '300', '400', '100'] },
-            { id: 14, text: 'ข้อหาเปลี่ยนเลนกะทันหันมีค่าปรับเท่าไหร่?', answer: '400', choices: ['300', '400', '500', '200'] },
-            { id: 15, text: 'ข้อหาไม่ปฏิบัติตามเครื่องหมายจราจรมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
-            { id: 16, text: 'ข้อหาขับรถโดยไม่มีประกันภัยมีค่าปรับเท่าไหร่?', answer: '600', choices: ['500', '600', '700', '400'] },
-            { id: 17, text: 'ข้อหาขับรถแซงในที่ห้ามแซงมีค่าปรับเท่าไหร่?', answer: '800', choices: ['600', '800', '1000', '400'] },
-            { id: 18, text: 'ข้อหาขับรถในช่องทางเดินรถประจำทางมีค่าปรับเท่าไหร่?', answer: '1000', choices: ['800', '1000', '1200', '600'] },
-            { id: 19, text: 'ข้อหาไม่สัญญาณไฟเลี้ยวมีค่าปรับเท่าไหร่?', answer: '400', choices: ['300', '400', '500', '200'] },
-            { id: 20, text: 'ข้อหาขับรถด้วยความเร็วต่ำเกินไปมีค่าปรับเท่าไหร่?', answer: '300', choices: ['200', '300', '400', '100'] },
-            { id: 21, text: 'ข้อหาไม่ปฏิบัติตามสัญญาณจราจรมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
-            { id: 22, text: 'ข้อหาขับรถที่มีควันดำเกินกำหนดมีค่าปรับเท่าไหร่?', answer: '1000', choices: ['800', '1000', '1200', '600'] },
-            { id: 23, text: 'ข้อหาขับรถโดยไม่มีกระจกข้างมีค่าปรับเท่าไหร่?', answer: '200', choices: ['100', '200', '300', '400'] },
-            { id: 24, text: 'ข้อหาขับรถตีคู่มีค่าปรับเท่าไหร่?', answer: '400', choices: ['300', '400', '500', '200'] },
-            { id: 25, text: 'ข้อหาไม่หยุดรถที่ทางแยกมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
-            { id: 26, text: 'ข้อหาขับรถที่มีเสียงดังเกินกำหนดมีค่าปรับเท่าไหร่?', answer: '1000', choices: ['800', '1000', '1200', '600'] },
-            { id: 27, text: 'ข้อหาขับรถโดยไม่ติดตั้งเข็มขัดนิรภัยมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
-            { id: 28, text: 'ข้อหาขับรถในทางที่กีดขวางจราจรมีค่าปรับเท่าไหร่?', answer: '400', choices: ['300', '400', '500', '200'] },
-            { id: 29, text: 'ข้อหาขับรถโดยไม่คำนึงถึงความปลอดภัยมีค่าปรับเท่าไหร่?', answer: '1000', choices: ['800', '1000', '1200', '600'] },
-            { id: 30, text: 'ข้อหาไม่ปฏิบัติตามคำสั่งเจ้าพนักงานมีค่าปรับเท่าไหร่?', answer: '1000', choices: ['800', '1000', '1200', '600'] },
-            { id: 31, text: 'ข้อหาขับรถที่มีไฟท้ายชำรุดมีค่าปรับเท่าไหร่?', answer: '200', choices: ['100', '200', '300', '400'] },
-            { id: 32, text: 'ข้อหาขับรถโดยไม่มีไฟเบรกมีค่าปรับเท่าไหร่?', answer: '300', choices: ['200', '300', '400', '100'] },
-            { id: 33, text: 'ข้อหาขับรถที่มีป้ายทะเบียนบดบังมีค่าปรับเท่าไหร่?', answer: '400', choices: ['300', '400', '500', '200'] },
-            { id: 34, text: 'ข้อหาขับรถโดยไม่แสดงใบอนุญาตมีค่าปรับเท่าไหร่?', answer: '200', choices: ['100', '200', '300', '400'] },
-            { id: 35, text: 'ข้อหาขับรถโดยไม่มีไฟสัญญาณมีค่าปรับเท่าไหร่?', answer: '300', choices: ['200', '300', '400', '100'] },
-            { id: 36, text: 'ข้อหาขับรถในสภาพยางชำรุดมีค่าปรับเท่าไหร่?', answer: '400', choices: ['300', '400', '500', '200'] },
-            { id: 37, text: 'ข้อหาขับรถที่มีไฟหน้าสีไม่ถูกต้องมีค่าปรับเท่าไหร่?', answer: '200', choices: ['100', '200', '300', '400'] },
-            { id: 38, text: 'ข้อหาขับรถโดยไม่ติดตั้งกระจกมองข้างมีค่าปรับเท่าไหร่?', answer: '300', choices: ['200', '300', '400', '100'] },
-            { id: 39, text: 'ข้อหาขับรถในทางจักรยานมีค่าปรับเท่าไหร่?', answer: '500', choices: ['400', '500', '600', '300'] },
-            { id: 40, text: 'หาพี่รหัสเจอหรือยังน้าาา ขอรหัสลับหน่อย', answer: '0609', choices: ['0609', '1234', '5678', '9012'] }
+            { 
+                id: 1, 
+                text: 'พี่หล่อไหมอ่ะ', 
+                answer: 'หล่อมากกกก', 
+                choices: [
+                    'ถึงจะไม่หล่อแต่ก็ไม่หล่ออยู่ดี', 
+                    'เหมือนลิง', 
+                    'หล่อมากกกก', 
+                    'หน้าตาอย่างนี้ก็กล้าถามเนาะ'
+                ], 
+                hint: 'พี่ชอบกฎหมาย' 
+            },
+            { 
+                id: 2, 
+                text: 'อะไรอยู่ข้างหน้าเลขหรือพยัญชนะ?', 
+                answer: null, 
+                choices: [], 
+                hint: 'ข้อนี้คือคำใบ้เลย ไปข้อต่อไป' 
+            },
+            { 
+                id: 3, 
+                text: 'A1 = 7,24,41,58,75,.....????', 
+                answer: '92', 
+                choices: ['71', '92', '58'], 
+                hint: 'สมการนี้ทำไมแปลกรหัสหรือป่าววน่าหรือไม่ใช่นะ' 
+            },
+            { 
+                id: 4, 
+                text: 'ไม่มีอะไรจะบอกแล้วววว', 
+                answer: null, 
+                choices: [], 
+                hint: 'ขอให้โชคดีนะ ขอให้เจอพี่รหัสกับ ?ลุง? หรือป้านะ' 
+            },
+            { 
+                id: 5, 
+                text: 'เจอพี่รหัสหรือยังน้าาา เขาอาจจะล็อกไว้ก็ได้นะ', 
+                answer: '0609', 
+                hint: '' 
+            }
         ];
 
-        let selectedQuestions = [];
+        let selectedQuestions = questions;
         let currentQuestion = 0;
         let score = { correct: 0, wrong: 0 };
         let answers = [];
         let wrongCount = 0;
         let isLocked = false;
         let lockUntil = localStorage.getItem('lockUntil') || 0;
-        let selectedChoice = null;
 
-        // สร้างกราฟ
-        const ctx = document.getElementById('scoreChart').getContext('2d');
-        const scoreChart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: ['ตอบถูก', 'ตอบผิด'],
-                datasets: [{
-                    label: 'ผลลัพธ์',
-                    data: [score.correct, score.wrong],
-                    backgroundColor: ['#00f2ff', '#ff00ff'],
-                    borderColor: '#1a1a1a',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'top', labels: { color: '#ffffff' } },
-                    title: { display: true, text: 'ผลลัพธ์การตอบคำถาม', color: '#ffffff' }
-                }
-            }
-        });
-
-        // สุ่มคำถาม 9 ข้อ + ข้อ 10 ล็อก
-        function shuffleQuestions() {
-            const shuffled = [...questions.slice(0, 39)].sort(() => Math.random() - 0.5);
-            selectedQuestions = shuffled.slice(0, 9);
-            selectedQuestions.push(questions.find(q => q.id === 40)); // ล็อกข้อสุดท้าย
+        // เริ่มควิซ
+        function startQuiz() {
+            document.getElementById('introContainer').classList.add('hidden');
+            document.getElementById('quizContainer').classList.remove('hidden');
+            showQuestion();
         }
 
         // สุ่มตัวเลือก
@@ -235,7 +283,7 @@
             return [...choices].sort(() => Math.random() - 0.5);
         }
 
-        // แสดงคำถามและตัวเลือก
+        // แสดงคำถามและตัวเลือก/ช่องกรอก
         function showQuestion() {
             if (isLocked) {
                 updateLockMessage();
@@ -245,30 +293,54 @@
                 const q = selectedQuestions[currentQuestion];
                 document.getElementById('question').innerText = `ข้อ ${currentQuestion + 1}: ${q.text}`;
                 const choicesDiv = document.getElementById('choices');
+                const answerInput = document.getElementById('answerInput');
+                const submitButton = document.getElementById('submitButton');
+                const nextButton = document.getElementById('nextButton');
                 choicesDiv.innerHTML = '';
-                const shuffledChoices = shuffleChoices(q.choices);
-                shuffledChoices.forEach(choice => {
-                    const choiceBtn = document.createElement('div');
-                    choiceBtn.className = 'choice';
-                    choiceBtn.innerText = choice;
-                    choiceBtn.onclick = () => selectChoice(choiceBtn, choice);
-                    choicesDiv.appendChild(choiceBtn);
-                });
+                answerInput.value = '';
                 document.getElementById('result').innerText = '';
+
+                if (q.id === 5) { // ข้อ 5 ใช้ช่องกรอก
+                    choicesDiv.classList.add('hidden');
+                    answerInput.classList.remove('hidden');
+                    submitButton.classList.remove('hidden');
+                    nextButton.classList.add('hidden');
+                    submitButton.disabled = false;
+                } else if (q.choices.length > 0) { // ข้อ 1, 3 ใช้ตัวเลือก
+                    choicesDiv.classList.remove('hidden');
+                    answerInput.classList.add('hidden');
+                    submitButton.classList.remove('hidden');
+                    nextButton.classList.add('hidden');
+                    const shuffledChoices = shuffleChoices(q.choices);
+                    shuffledChoices.forEach(choice => {
+                        const choiceBtn = document.createElement('div');
+                        choiceBtn.className = 'choice';
+                        choiceBtn.innerText = choice;
+                        choiceBtn.onclick = () => selectChoice(choiceBtn, choice);
+                        choicesDiv.appendChild(choiceBtn);
+                    });
+                    submitButton.disabled = true;
+                } else { // ข้อ 2, 4 ไม่มีตัวเลือก
+                    choicesDiv.classList.add('hidden');
+                    answerInput.classList.add('hidden');
+                    submitButton.classList.add('hidden');
+                    nextButton.classList.remove('hidden');
+                    document.getElementById('result').innerText = `คำใบ้: ${q.hint}\nก็กดไปเลยสิ!!!`;
+                }
+
                 document.getElementById('quizContainer').classList.remove('hidden');
                 document.getElementById('resultContainer').classList.add('hidden');
-                selectedChoice = null;
-                document.getElementById('submitButton').disabled = true;
             } else {
                 document.getElementById('quizContainer').classList.add('hidden');
                 document.getElementById('resultContainer').classList.remove('hidden');
-                document.getElementById('score').innerText = `คุณตอบถูก ${score.correct} ข้อ, ผิด ${score.wrong} ข้อ`;
+                document.getElementById('score').innerText = `ตอบถูก: ${score.correct} ข้อ, ตอบผิด: ${score.wrong} ข้อ`;
                 document.getElementById('lockMessage').innerText = '';
                 document.getElementById('resetButton').style.display = 'none';
             }
         }
 
         // เลือกตัวเลือก
+        let selectedChoice = null;
         function selectChoice(btn, choice) {
             document.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
             btn.classList.add('selected');
@@ -278,38 +350,58 @@
 
         // ตรวจคำตอบ
         function checkAnswer() {
-            if (isLocked || !selectedChoice) return;
-            const correctAnswer = selectedQuestions[currentQuestion].answer.toString();
-            const isCorrect = selectedChoice === correctAnswer;
+            if (isLocked) return;
+            const q = selectedQuestions[currentQuestion];
+            let userAnswer;
+
+            if (q.id === 5) { // ข้อ 5 ใช้ช่องกรอก
+                userAnswer = document.getElementById('answerInput').value.trim();
+            } else { // ข้อ 1, 3 ใช้ตัวเลือก
+                if (!selectedChoice) return;
+                userAnswer = selectedChoice;
+            }
+
+            const correctAnswer = q.answer ? q.answer.toString() : null;
+            const isCorrect = userAnswer === correctAnswer;
             answers.push({
-                question: selectedQuestions[currentQuestion].text,
-                userAnswer: selectedChoice,
+                question: q.text,
+                userAnswer,
                 isCorrect
             });
+
+            const submitButton = document.getElementById('submitButton');
+            const nextButton = document.getElementById('nextButton');
+
             if (isCorrect) {
                 score.correct++;
-                document.getElementById('result').innerText = 'ถูกต้อง!';
+                document.getElementById('result').innerText = `ถูกไปก็ไม่ได้ใจเขาหรอก: ${q.hint}`;
                 document.getElementById('result').className = 'correct';
+                submitButton.classList.add('hidden');
+                nextButton.classList.remove('hidden');
             } else {
                 score.wrong++;
                 wrongCount++;
-                document.getElementById('result').innerText = 'ผิด!';
+                document.getElementById('result').innerText = 'ว้ายยยไม่ถูก';
                 document.getElementById('result').className = 'wrong';
+                submitButton.classList.remove('hidden');
+                nextButton.classList.add('hidden');
             }
-            scoreChart.data.datasets[0].data = [score.correct, score.wrong];
-            scoreChart.update();
 
             if (wrongCount > 3) {
                 isLocked = true;
-                lockUntil = Date.now() + 30 * 60 * 1000; // ล็อก 30 นาที
+                lockUntil = Date.now() + 20 * 60 * 1000; // ล็อก 20 นาที
                 localStorage.setItem('lockUntil', lockUntil);
                 document.getElementById('resetButton').style.display = 'block';
                 updateLockMessage();
                 return;
             }
+        }
 
+        // ไปข้อถัดไป
+        function nextQuestion() {
             currentQuestion++;
-            setTimeout(showQuestion, 1000);
+            selectedChoice = null;
+            showQuestion();
         }
 
         // อัพเดตข้อความล็อก
@@ -319,15 +411,15 @@
                 const remaining = Math.ceil((lockUntil - now) / 1000 / 60);
                 document.getElementById('quizContainer').classList.add('hidden');
                 document.getElementById('resultContainer').classList.add('hidden');
+                document.getElementById('introContainer').classList.add('hidden');
                 document.getElementById('lockMessage').innerText = `ล็อกควิซ! รอ ${remaining} นาที หรือกดรีเซ็ต`;
                 document.getElementById('resetButton').style.display = 'block';
             } else {
                 isLocked = false;
                 localStorage.removeItem('lockUntil');
-                document.getElementById('quizContainer').classList.remove('hidden');
+                document.getElementById('introContainer').classList.remove('hidden');
                 document.getElementById('lockMessage').innerText = '';
                 document.getElementById('resetButton').style.display = 'none';
-                showQuestion();
             }
         }
 
@@ -341,10 +433,11 @@
             score.correct = 0;
             score.wrong = 0;
             answers = [];
-            shuffleQuestions();
-            scoreChart.data.datasets[0].data = [0, 0];
-            scoreChart.update();
-            updateLockMessage();
+            document.getElementById('introContainer').classList.remove('hidden');
+            document.getElementById('quizContainer').classList.add('hidden');
+            document.getElementById('resultContainer').classList.add('hidden');
+            document.getElementById('lockMessage').innerText = '';
+            document.getElementById('resetButton').style.display = 'none';
         }
 
         // รีสตาร์ทควิซ
@@ -354,19 +447,15 @@
             score.wrong = 0;
             wrongCount = 0;
             answers = [];
-            shuffleQuestions();
-            scoreChart.data.datasets[0].data = [0, 0];
-            scoreChart.update();
-            showQuestion();
+            document.getElementById('introContainer').classList.remove('hidden');
+            document.getElementById('quizContainer').classList.add('hidden');
+            document.getElementById('resultContainer').classList.add('hidden');
         }
 
-        // เริ่มควิซ
+        // เริ่มต้น
         if (Date.now() < lockUntil) {
             isLocked = true;
             updateLockMessage();
-        } else {
-            shuffleQuestions();
-            showQuestion();
         }
     </script>
 </body>
