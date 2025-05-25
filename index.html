@@ -424,9 +424,22 @@
 
         #video {
             width: 100%;
-            max-width: 600px; /* เพิ่มขนาดเพื่อความแม่นยำ */
+            max-width: 500px;
             border-radius: 10px;
             border: 2px solid #e1e5e9;
+            position: relative;
+        }
+
+        #videoOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px dashed #3498db;
+            border-radius: 10px;
+            pointer-events: none;
+            display: none;
         }
 
         #canvas {
@@ -437,6 +450,21 @@
             margin-top: 10px;
             font-size: 0.9rem;
             color: #666;
+        }
+
+        #debugInfo {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        #scanTips {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #ff9800;
+            background: rgba(255, 152, 0, 0.1);
+            padding: 10px;
+            border-radius: 5px;
         }
 
         .camera-controls {
@@ -476,6 +504,9 @@
 
         #qrcode {
             margin: 10px auto;
+            padding: 10px;
+            background: white; /* เพิ่มพื้นหลังสีขาวเพื่อให้สแกนง่าย */
+            border: 5px solid white; /* เพิ่มขอบสีขาว */
         }
 
         @media (max-width: 768px) {
@@ -653,7 +684,10 @@
                 <div class="main-card">
                     <h3><i class="fas fa-users"></i> รายชื่อนักเรียน</h3>
                     <div class="camera-section">
-                        <video id="video" autoplay></video>
+                        <div style="position: relative;">
+                            <video id="video" autoplay></video>
+                            <div id="videoOverlay"></div>
+                        </div>
                         <canvas id="canvas" style="display: none;"></canvas>
                         <div class="camera-controls">
                             <button class="btn" id="startCameraBtn" onclick="startCamera()"><i class="fas fa-camera"></i> เปิดกล้อง</button>
@@ -663,7 +697,13 @@
                             </select>
                         </div>
                         <div id="scanStatus">กด "เปิดกล้อง" เพื่อเริ่มสแกน QR Code</div>
-                        <div id="debugInfo" style="margin-top: 10px; font-size: 0.8rem; color: #666;"></div>
+                        <div id="debugInfo"></div>
+                        <div id="scanTips">
+                            คำแนะนำ: <br>
+                            - วาง QR Code ให้อยู่ในกรอบ<br>
+                            - ระยะห่างประมาณ 20-40 ซม.<br>
+                            - ตรวจสอบให้แน่ใจว่าแสงเพียงพอและไม่มีเงา
+                        </div>
                     </div>
                     <div class="search-bar">
                         <input type="text" id="teacherSearch" placeholder="ค้นหานักเรียน (ชื่อหรือรหัส)">
@@ -776,6 +816,7 @@
         let stream = null;
         let cameras = [];
         let currentCameraId = null;
+        let scanResults = [];
 
         // Check system status
         function checkSystemStatus(callback) {
@@ -939,18 +980,18 @@
                         historyContainer.innerHTML = '<p style="text-align: center; color: #666;">ไม่มีประวัติ</p>';
                     }
 
-                    // สร้าง QR Code ขนาดใหญ่และคุณภาพสูง
+                    // สร้าง QR Code
                     const qrcodeDiv = document.getElementById('qrcode');
                     const studentIdDisplay = document.getElementById('studentIdDisplay');
                     if (qrcodeDiv && studentIdDisplay) {
                         qrcodeDiv.innerHTML = '';
                         new QRCode(qrcodeDiv, {
                             text: currentUser.id,
-                            width: 300, // ขนาดใหญ่ขึ้นเพื่อความแม่นยำ
+                            width: 300, // ขนาดใหญ่ขึ้น
                             height: 300,
                             colorDark: "#000000",
                             colorLight: "#ffffff",
-                            correctLevel: QRCode.CorrectLevel.H // ความทนทานสูงสุด
+                            correctLevel: QRCode.CorrectLevel.Q
                         });
                         studentIdDisplay.textContent = currentUser.id;
                     }
@@ -1261,6 +1302,44 @@
             setTimeout(() => notification.remove(), 5000);
         }
 
+        // ปรับแต่งภาพ (brightness และ contrast)
+        function adjustImage(imageData, brightness = 1.2, contrast = 1.5) {
+            const data = imageData.data;
+            const brightnessFactor = brightness;
+            const contrastFactor = contrast;
+
+            for (let i = 0; i < data.length; i += 4) {
+                // ปรับ brightness
+                data[i] = Math.min(255, Math.max(0, data[i] * brightnessFactor));     // R
+                data[i + 1] = Math.min(255, Math.max(0, data[i + 1] * brightnessFactor)); // G
+                data[i + 2] = Math.min(255, Math.max(0, data[i + 2] * brightnessFactor)); // B
+
+                // ปรับ contrast
+                data[i] = Math.min(255, Math.max(0, ((data[i] - 128) * contrastFactor) + 128));
+                data[i + 1] = Math.min(255, Math.max(0, ((data[i + 1] - 128) * contrastFactor) + 128));
+                data[i + 2] = Math.min(255, Math.max(0, ((data[i + 2] - 128) * contrastFactor) + 128));
+            }
+
+            return imageData;
+        }
+
+        // คำนวณความสว่างเฉลี่ยของภาพ
+        function calculateBrightness(imageData) {
+            const data = imageData.data;
+            let sum = 0;
+            let pixelCount = 0;
+
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                sum += (0.299 * r + 0.587 * g + 0.114 * b); // สูตรคำนวณความสว่าง
+                pixelCount++;
+            }
+
+            return sum / pixelCount;
+        }
+
         // Camera functions
         async function startCamera() {
             video = document.getElementById('video');
@@ -1279,7 +1358,7 @@
 
                 const constraints = currentCameraId
                     ? { video: { deviceId: { exact: currentCameraId }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } } }
-                    : { video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 }, focusMode: 'continuous' } };
+                    : { video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } } };
 
                 stream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = stream;
@@ -1291,7 +1370,9 @@
                     document.getElementById('startCameraBtn').style.display = 'none';
                     document.getElementById('stopCameraBtn').style.display = 'inline-block';
                     document.getElementById('cameraSelect').style.display = 'inline-block';
+                    document.getElementById('videoOverlay').style.display = 'block';
                     scanning = true;
+                    scanResults = [];
                     document.getElementById('scanStatus').textContent = 'กำลังสแกน QR Code...';
                     document.getElementById('debugInfo').textContent = `Resolution: ${video.videoWidth}x${video.videoHeight}`;
                     requestAnimationFrame(tick);
@@ -1306,6 +1387,7 @@
 
         function stopCamera() {
             scanning = false;
+            scanResults = [];
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
                 stream = null;
@@ -1316,6 +1398,7 @@
             document.getElementById('startCameraBtn').style.display = 'inline-block';
             document.getElementById('stopCameraBtn').style.display = 'none';
             document.getElementById('cameraSelect').style.display = 'none';
+            document.getElementById('videoOverlay').style.display = 'none';
             document.getElementById('scanStatus').textContent = 'กด "เปิดกล้อง" เพื่อเริ่มสแกน QR Code';
             document.getElementById('debugInfo').textContent = '';
         }
@@ -1353,71 +1436,52 @@
                 return;
             }
 
-            // ปรับขนาด Canvas ให้เหมาะสม
-            const scaleFactor = Math.min(1, 600 / Math.max(video.videoWidth, video.videoHeight));
-            canvas.width = video.videoWidth * scaleFactor;
-            canvas.height = video.videoHeight * scaleFactor;
             canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+            let imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
 
-            // กรองภาพเบลอหรือมืดเกินไป
-            const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
-            let brightness = 0;
-            for (let i = 0; i < imageData.data.length; i += 4) {
-                brightness += (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
-            }
-            brightness /= (imageData.data.length / 4);
-            if (brightness < 50) {
-                document.getElementById('scanStatus').textContent = 'แสงสว่างไม่เพียงพอ กรุณาเพิ่มแสง';
-                document.getElementById('debugInfo').textContent = `Brightness: ${brightness.toFixed(2)} | No QR Code detected`;
-                requestAnimationFrame(tick);
-                return;
-            }
+            // คำนวณความสว่าง
+            const brightness = calculateBrightness(imageData);
+            let debugMessage = `Resolution: ${canvas.width}x${canvas.height} | Brightness: ${brightness.toFixed(2)}`;
 
-            // สแกน QR Code
+            // ปรับแต่งภาพ
+            imageData = adjustImage(imageData, brightness < 80 ? 1.3 : 1.0, brightness < 80 ? 1.5 : 1.2);
+
             const code = jsQR(imageData.data, imageData.width, imageData.height, {
                 inversionAttempts: 'attemptBoth',
                 findBestPattern: true,
-                maxScanRegions: 1,
-                quietZoneSize: 10 // เพิ่มขอบเงียบเพื่อความแม่นยำ
+                maxScanRegions: 1
             });
 
             if (code) {
                 const scannedId = code.data.trim().toUpperCase();
-                document.getElementById('debugInfo').textContent = `Detected: ${scannedId} (Location: ${code.location.topLeft.x},${code.location.topLeft.y})`;
-                // ยืนยันผลลัพธ์ 3 ครั้ง
-                let confirmCount = 1;
-                const confirmScan = () => {
-                    if (confirmCount < 3) {
-                        requestAnimationFrame(() => {
-                            canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
-                            const confirmCode = jsQR(canvasContext.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height, {
-                                inversionAttempts: 'attemptBoth',
-                                findBestPattern: true,
-                                maxScanRegions: 1
-                            });
-                            if (confirmCode && confirmCode.data === scannedId) {
-                                confirmCount++;
-                                confirmScan();
-                            } else {
-                                document.getElementById('scanStatus').textContent = 'กำลังยืนยันรหัส...';
-                                requestAnimationFrame(tick);
-                            }
-                        });
-                    } else {
-                        if (detectRole(scannedId) === 'student') {
-                            stopCamera();
-                            document.getElementById('scanStatus').textContent = `สแกนสำเร็จ: ${scannedId}`;
-                            openEditScoreModal(scannedId);
-                        } else {
-                            document.getElementById('scanStatus').textContent = 'รหัสที่สแกนไม่ใช่นักเรียน (ต้องเริ่มด้วย 3 และยาว 5 ตัว)';
-                        }
+                scanResults.push(scannedId);
+
+                // ตรวจสอบว่าผลลัพธ์เหมือนกัน 3 ครั้งติดต่อกัน
+                if (scanResults.length >= 3) {
+                    const lastThree = scanResults.slice(-3);
+                    if (lastThree.every(id => id === lastThree[0]) && detectRole(scannedId) === 'student') {
+                        stopCamera();
+                        document.getElementById('scanStatus').textContent = `สแกนสำเร็จ: ${scannedId}`;
+                        document.getElementById('debugInfo').textContent = `Detected: ${scannedId} (Location: ${code.location.topLeftCorner.x},${code.location.topLeftCorner.y})`;
+                        openEditScoreModal(scannedId);
+                        return;
                     }
-                };
-                confirmScan();
+                }
+
+                debugMessage += ` | Detected: ${scannedId} (Location: ${code.location.topLeftCorner.x},${code.location.topLeftCorner.y})`;
+                document.getElementById('scanStatus').textContent = 'ตรวจพบ QR Code แต่กำลังยืนยัน...';
             } else {
+                scanResults = []; // รีเซ็ตผลลัพธ์ถ้าไม่พบ QR Code
                 document.getElementById('scanStatus').textContent = 'กำลังสแกน QR Code... ไม่พบรหัส';
-                document.getElementById('debugInfo').textContent = `Resolution: ${canvas.width}x${canvas.height} | Brightness: ${brightness.toFixed(2)} | No QR Code detected`;
+                debugMessage += ' | No QR Code detected';
+                if (brightness < 50) {
+                    document.getElementById('scanTips').innerHTML = 'คำแนะนำ: <br>- ภาพมืดเกินไป กรุณาเพิ่มแสงสว่าง<br>- วาง QR Code ให้อยู่ในกรอบ<br>- ระยะห่างประมาณ 20-40 ซม.';
+                } else if (brightness > 200) {
+                    document.getElementById('scanTips').innerHTML = 'คำแนะนำ: <br>- ภาพสว่างเกินไป กรุณาลดแสงหรือหลีกเลี่ยงแสงสะท้อน<br>- วาง QR Code ให้อยู่ในกรอบ<br>- ระยะห่างประมาณ 20-40 ซม.';
+                }
             }
+
+            document.getElementById('debugInfo').textContent = debugMessage;
 
             if (scanning) {
                 requestAnimationFrame(tick);
