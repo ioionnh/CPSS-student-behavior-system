@@ -472,6 +472,11 @@
             gap: 10px;
             justify-content: center;
             margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        #qrUpload {
+            margin-top: 10px;
         }
 
         @keyframes slideIn {
@@ -504,9 +509,9 @@
 
         #qrcode {
             margin: 10px auto;
-            padding: 10px;
-            background: white; /* เพิ่มพื้นหลังสีขาวเพื่อให้สแกนง่าย */
-            border: 5px solid white; /* เพิ่มขอบสีขาว */
+            padding: 15px;
+            background: white;
+            border: 10px solid white;
         }
 
         @media (max-width: 768px) {
@@ -695,6 +700,8 @@
                             <select id="cameraSelect" onchange="changeCamera()" style="display: none;">
                                 <option value="">เลือกกล้อง</option>
                             </select>
+                            <input type="file" id="qrUpload" accept="image/*" onchange="scanFromImage()" style="display: none;">
+                            <button class="btn btn-secondary" id="uploadBtn" onclick="document.getElementById('qrUpload').click()"><i class="fas fa-upload"></i> อัปโหลดภาพ</button>
                         </div>
                         <div id="scanStatus">กด "เปิดกล้อง" เพื่อเริ่มสแกน QR Code</div>
                         <div id="debugInfo"></div>
@@ -702,7 +709,8 @@
                             คำแนะนำ: <br>
                             - วาง QR Code ให้อยู่ในกรอบ<br>
                             - ระยะห่างประมาณ 20-40 ซม.<br>
-                            - ตรวจสอบให้แน่ใจว่าแสงเพียงพอและไม่มีเงา
+                            - ตรวจสอบให้แน่ใจว่าแสงเพียงพอและไม่มีเงา<br>
+                            - หากกล้องไม่โฟกัส ให้แตะหน้าจอเพื่อโฟกัส
                         </div>
                     </div>
                     <div class="search-bar">
@@ -987,7 +995,7 @@
                         qrcodeDiv.innerHTML = '';
                         new QRCode(qrcodeDiv, {
                             text: currentUser.id,
-                            width: 300, // ขนาดใหญ่ขึ้น
+                            width: 300,
                             height: 300,
                             colorDark: "#000000",
                             colorLight: "#ffffff",
@@ -1323,6 +1331,22 @@
             return imageData;
         }
 
+        // ใช้ฟิลเตอร์ขาว-ดำ (thresholding)
+        function applyThreshold(imageData, threshold = 128) {
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+                const value = brightness > threshold ? 255 : 0;
+                data[i] = value;
+                data[i + 1] = value;
+                data[i + 2] = value;
+            }
+            return imageData;
+        }
+
         // คำนวณความสว่างเฉลี่ยของภาพ
         function calculateBrightness(imageData) {
             const data = imageData.data;
@@ -1333,7 +1357,7 @@
                 const r = data[i];
                 const g = data[i + 1];
                 const b = data[i + 2];
-                sum += (0.299 * r + 0.587 * g + 0.114 * b); // สูตรคำนวณความสว่าง
+                sum += (0.299 * r + 0.587 * g + 0.114 * b);
                 pixelCount++;
             }
 
@@ -1357,8 +1381,8 @@
                 await enumerateCameras();
 
                 const constraints = currentCameraId
-                    ? { video: { deviceId: { exact: currentCameraId }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } } }
-                    : { video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } } };
+                    ? { video: { deviceId: { exact: currentCameraId }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 }, focusMode: "continuous" } }
+                    : { video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 }, focusMode: "continuous" } };
 
                 stream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = stream;
@@ -1428,6 +1452,49 @@
             }
         }
 
+        function scanFromImage() {
+            const fileInput = document.getElementById('qrUpload');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    canvasContext.drawImage(img, 0, 0);
+
+                    let imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+                    const brightness = calculateBrightness(imageData);
+                    imageData = adjustImage(imageData, brightness < 80 ? 1.3 : 1.0, brightness < 80 ? 1.5 : 1.2);
+                    imageData = applyThreshold(imageData, 128);
+
+                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: 'attemptBoth',
+                        findBestPattern: true,
+                        maxScanRegions: 1
+                    });
+
+                    if (code) {
+                        const scannedId = code.data.trim().toUpperCase();
+                        if (detectRole(scannedId) === 'student') {
+                            document.getElementById('scanStatus').textContent = `สแกนสำเร็จจากภาพ: ${scannedId}`;
+                            document.getElementById('debugInfo').textContent = `Detected from image: ${scannedId}`;
+                            openEditScoreModal(scannedId);
+                        } else {
+                            document.getElementById('scanStatus').textContent = 'รหัสที่สแกนจากภาพไม่ใช่นักเรียน (ต้องเริ่มด้วย 3 และยาว 5 ตัว)';
+                        }
+                    } else {
+                        document.getElementById('scanStatus').textContent = 'ไม่พบ QR Code ในภาพที่อัปโหลด';
+                        document.getElementById('debugInfo').textContent = 'No QR Code detected in uploaded image';
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
         function tick() {
             if (!scanning || !video || video.readyState !== video.HAVE_ENOUGH_DATA) {
                 if (scanning) {
@@ -1445,6 +1512,7 @@
 
             // ปรับแต่งภาพ
             imageData = adjustImage(imageData, brightness < 80 ? 1.3 : 1.0, brightness < 80 ? 1.5 : 1.2);
+            imageData = applyThreshold(imageData, 128);
 
             const code = jsQR(imageData.data, imageData.width, imageData.height, {
                 inversionAttempts: 'attemptBoth',
@@ -1456,7 +1524,6 @@
                 const scannedId = code.data.trim().toUpperCase();
                 scanResults.push(scannedId);
 
-                // ตรวจสอบว่าผลลัพธ์เหมือนกัน 3 ครั้งติดต่อกัน
                 if (scanResults.length >= 3) {
                     const lastThree = scanResults.slice(-3);
                     if (lastThree.every(id => id === lastThree[0]) && detectRole(scannedId) === 'student') {
@@ -1471,13 +1538,13 @@
                 debugMessage += ` | Detected: ${scannedId} (Location: ${code.location.topLeftCorner.x},${code.location.topLeftCorner.y})`;
                 document.getElementById('scanStatus').textContent = 'ตรวจพบ QR Code แต่กำลังยืนยัน...';
             } else {
-                scanResults = []; // รีเซ็ตผลลัพธ์ถ้าไม่พบ QR Code
+                scanResults = [];
                 document.getElementById('scanStatus').textContent = 'กำลังสแกน QR Code... ไม่พบรหัส';
                 debugMessage += ' | No QR Code detected';
                 if (brightness < 50) {
-                    document.getElementById('scanTips').innerHTML = 'คำแนะนำ: <br>- ภาพมืดเกินไป กรุณาเพิ่มแสงสว่าง<br>- วาง QR Code ให้อยู่ในกรอบ<br>- ระยะห่างประมาณ 20-40 ซม.';
+                    document.getElementById('scanTips').innerHTML = 'คำแนะนำ: <br>- ภาพมืดเกินไป กรุณาเพิ่มแสงสว่าง<br>- วาง QR Code ให้อยู่ในกรอบ<br>- ระยะห่างประมาณ 20-40 ซม.<br>- หากกล้องไม่โฟกัส ให้แตะหน้าจอเพื่อโฟกัส';
                 } else if (brightness > 200) {
-                    document.getElementById('scanTips').innerHTML = 'คำแนะนำ: <br>- ภาพสว่างเกินไป กรุณาลดแสงหรือหลีกเลี่ยงแสงสะท้อน<br>- วาง QR Code ให้อยู่ในกรอบ<br>- ระยะห่างประมาณ 20-40 ซม.';
+                    document.getElementById('scanTips').innerHTML = 'คำแนะนำ: <br>- ภาพสว่างเกินไป กรุณาลดแสงหรือหลีกเลี่ยงแสงสะท้อน<br>- วาง QR Code ให้อยู่ในกรอบ<br>- ระยะห่างประมาณ 20-40 ซม.<br>- หากกล้องไม่โฟกัส ให้แตะหน้าจอเพื่อโฟกัส';
                 }
             }
 
@@ -1524,6 +1591,14 @@
                 const hamburger = document.querySelector('.hamburger');
                 if (!dropdown.contains(e.target) && !hamburger.contains(e.target)) {
                     dropdown.classList.remove('active');
+                }
+            });
+
+            // เพิ่มการแตะเพื่อโฟกัส
+            document.getElementById('video').addEventListener('click', () => {
+                if (scanning) {
+                    showNotification('แตะเพื่อโฟกัสกล้อง', 'success');
+                    // บางอุปกรณ์อาจต้องใช้การเรียกโฟกัสเพิ่มเติม
                 }
             });
         });
