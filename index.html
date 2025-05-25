@@ -424,7 +424,7 @@
 
         #video {
             width: 100%;
-            max-width: 500px; /* เพิ่มขนาดให้ใหญ่ขึ้นเพื่อการจับภาพที่ชัดเจน */
+            max-width: 600px; /* เพิ่มขนาดเพื่อความแม่นยำ */
             border-radius: 10px;
             border: 2px solid #e1e5e9;
         }
@@ -939,18 +939,18 @@
                         historyContainer.innerHTML = '<p style="text-align: center; color: #666;">ไม่มีประวัติ</p>';
                     }
 
-                    // สร้าง QR Code (ขนาดใหญ่และชัดเจน)
+                    // สร้าง QR Code ขนาดใหญ่และคุณภาพสูง
                     const qrcodeDiv = document.getElementById('qrcode');
                     const studentIdDisplay = document.getElementById('studentIdDisplay');
                     if (qrcodeDiv && studentIdDisplay) {
                         qrcodeDiv.innerHTML = '';
                         new QRCode(qrcodeDiv, {
                             text: currentUser.id,
-                            width: 250, // ขนาดใหญ่ขึ้นเพื่อให้สแกนง่าย
-                            height: 250,
+                            width: 300, // ขนาดใหญ่ขึ้นเพื่อความแม่นยำ
+                            height: 300,
                             colorDark: "#000000",
                             colorLight: "#ffffff",
-                            correctLevel: QRCode.CorrectLevel.Q // เพิ่มความทนทานต่อความเสียหาย
+                            correctLevel: QRCode.CorrectLevel.H // ความทนทานสูงสุด
                         });
                         studentIdDisplay.textContent = currentUser.id;
                     }
@@ -1279,7 +1279,7 @@
 
                 const constraints = currentCameraId
                     ? { video: { deviceId: { exact: currentCameraId }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } } }
-                    : { video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } } };
+                    : { video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 }, focusMode: 'continuous' } };
 
                 stream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = stream;
@@ -1353,27 +1353,70 @@
                 return;
             }
 
+            // ปรับขนาด Canvas ให้เหมาะสม
+            const scaleFactor = Math.min(1, 600 / Math.max(video.videoWidth, video.videoHeight));
+            canvas.width = video.videoWidth * scaleFactor;
+            canvas.height = video.videoHeight * scaleFactor;
             canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // กรองภาพเบลอหรือมืดเกินไป
             const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+            let brightness = 0;
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                brightness += (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
+            }
+            brightness /= (imageData.data.length / 4);
+            if (brightness < 50) {
+                document.getElementById('scanStatus').textContent = 'แสงสว่างไม่เพียงพอ กรุณาเพิ่มแสง';
+                document.getElementById('debugInfo').textContent = `Brightness: ${brightness.toFixed(2)} | No QR Code detected`;
+                requestAnimationFrame(tick);
+                return;
+            }
+
+            // สแกน QR Code
             const code = jsQR(imageData.data, imageData.width, imageData.height, {
                 inversionAttempts: 'attemptBoth',
-                findBestPattern: true, // เพิ่มการหาตำแหน่งที่ดีที่สุด
-                maxScanRegions: 1 // จำกัดการสแกนครั้งละ 1 ครั้งเพื่อประสิทธิภาพ
+                findBestPattern: true,
+                maxScanRegions: 1,
+                quietZoneSize: 10 // เพิ่มขอบเงียบเพื่อความแม่นยำ
             });
 
             if (code) {
                 const scannedId = code.data.trim().toUpperCase();
                 document.getElementById('debugInfo').textContent = `Detected: ${scannedId} (Location: ${code.location.topLeft.x},${code.location.topLeft.y})`;
-                if (detectRole(scannedId) === 'student') {
-                    stopCamera();
-                    document.getElementById('scanStatus').textContent = `สแกนสำเร็จ: ${scannedId}`;
-                    openEditScoreModal(scannedId);
-                } else {
-                    document.getElementById('scanStatus').textContent = 'รหัสที่สแกนไม่ใช่นักเรียน (ต้องเริ่มด้วย 3 และยาว 5 ตัว)';
-                }
+                // ยืนยันผลลัพธ์ 3 ครั้ง
+                let confirmCount = 1;
+                const confirmScan = () => {
+                    if (confirmCount < 3) {
+                        requestAnimationFrame(() => {
+                            canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+                            const confirmCode = jsQR(canvasContext.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height, {
+                                inversionAttempts: 'attemptBoth',
+                                findBestPattern: true,
+                                maxScanRegions: 1
+                            });
+                            if (confirmCode && confirmCode.data === scannedId) {
+                                confirmCount++;
+                                confirmScan();
+                            } else {
+                                document.getElementById('scanStatus').textContent = 'กำลังยืนยันรหัส...';
+                                requestAnimationFrame(tick);
+                            }
+                        });
+                    } else {
+                        if (detectRole(scannedId) === 'student') {
+                            stopCamera();
+                            document.getElementById('scanStatus').textContent = `สแกนสำเร็จ: ${scannedId}`;
+                            openEditScoreModal(scannedId);
+                        } else {
+                            document.getElementById('scanStatus').textContent = 'รหัสที่สแกนไม่ใช่นักเรียน (ต้องเริ่มด้วย 3 และยาว 5 ตัว)';
+                        }
+                    }
+                };
+                confirmScan();
             } else {
                 document.getElementById('scanStatus').textContent = 'กำลังสแกน QR Code... ไม่พบรหัส';
-                document.getElementById('debugInfo').textContent = `Resolution: ${video.videoWidth}x${video.videoHeight} | No QR Code detected`;
+                document.getElementById('debugInfo').textContent = `Resolution: ${canvas.width}x${canvas.height} | Brightness: ${brightness.toFixed(2)} | No QR Code detected`;
             }
 
             if (scanning) {
