@@ -10,6 +10,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- jsQR Library for QR Code Scanning -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
 
@@ -415,6 +417,22 @@
             padding: 12px 20px;
         }
 
+        .camera-section {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        #video {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            border: 2px solid #e1e5e9;
+        }
+
+        #canvas {
+            display: none;
+        }
+
         @keyframes slideIn {
             from {
                 transform: translateY(-50px);
@@ -445,22 +463,6 @@
 
         #qrcode {
             margin: 10px auto;
-        }
-
-        /* เพิ่มสไตล์สำหรับปุ่มสแกน QR Code */
-        .scan-bar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .scan-bar input {
-            flex: 1;
-        }
-
-        .scan-bar .btn {
-            padding: 12px 20px;
         }
 
         @media (max-width: 768px) {
@@ -533,11 +535,11 @@
                 padding: 10px 18px;
             }
 
-            .search-bar, .scan-bar {
+            .search-bar {
                 flex-direction: column;
             }
 
-            .search-bar .btn, .scan-bar .btn {
+            .search-bar .btn {
                 width: 100%;
             }
 
@@ -549,6 +551,10 @@
             .room-tab {
                 width: 100%;
                 margin: 5px 0;
+            }
+
+            #video {
+                max-width: 100%;
             }
         }
     </style>
@@ -629,10 +635,13 @@
             <div id="teacherDashboard" class="hidden">
                 <div class="main-card">
                     <h3><i class="fas fa-users"></i> รายชื่อนักเรียน</h3>
-                    <!-- เพิ่มช่องสำหรับสแกน QR Code -->
-                    <div class="scan-bar">
-                        <input type="text" id="scanStudentId" placeholder="กรอกรหัสนักเรียนจาก QR Code">
-                        <button class="btn" onclick="processScannedStudent()"><i class="fas fa-qrcode"></i> ตรวจสอบ</button>
+                    <div class="camera-section">
+                        <video id="video" autoplay></video>
+                        <canvas id="canvas" style="display: none;"></canvas>
+                        <div style="margin-top: 10px;">
+                            <button class="btn" id="startCameraBtn" onclick="startCamera()"><i class="fas fa-camera"></i> เปิดกล้อง</button>
+                            <button class="btn btn-secondary" id="stopCameraBtn" onclick="stopCamera()" style="display: none;"><i class="fas fa-camera-slash"></i> ปิดกล้อง</button>
+                        </div>
                     </div>
                     <div class="search-bar">
                         <input type="text" id="teacherSearch" placeholder="ค้นหานักเรียน (ชื่อหรือรหัส)">
@@ -668,11 +677,11 @@
                 </div>
             </div>
 
-            <!-- Modal for Editing Score -->
+            <!-- Modal for Score Adjustment -->
             <div id="editScoreModal" class="modal">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3>ขอเปลี่ยนคะแนนความประพฤติ</h3>
+                        <h3>ปรับเปลี่ยนคะแนนความประพฤติ</h3>
                         <button class="close-btn" onclick="closeModal('editScoreModal')">×</button>
                     </div>
                     <div class="form-group">
@@ -688,17 +697,22 @@
                         <label>คะแนนปัจจุบัน: <span id="modalCurrentScore"></span></label>
                     </div>
                     <div class="form-group">
-                        <label for="scoreChange">จำนวนคะแนนที่เปลี่ยนแปลง:</label>
+                        <label for="scoreChange">เลือกการเปลี่ยนคะแนน:</label>
                         <select id="scoreChange">
-                            <option value="">เลือกคะแนน</option>
+                            <option value="0">ไม่เปลี่ยนแปลง</option>
+                            <option value="5">+5</option>
+                            <option value="-5">-5</option>
+                            <option value="10">+10</option>
+                            <option value="-10">-10</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="scoreReason">เหตุผล:</label>
-                        <textarea id="scoreReason" rows="4" placeholder="ระบุเหตุผลการเปลี่ยนแปลงคะแนน"></textarea>
+                        <textarea id="scoreReason" rows="4" placeholder="ระบุเหตุผลการเปลี่ยนแปลงคะแนน" required></textarea>
                     </div>
                     <div class="modal-actions">
-                        <button class="btn btn-add" onclick="submitScoreChangeRequest()">ส่งคำขอ</button>
+                        <button class="btn btn-success" onclick="submitScoreChange()">ยืนยัน</button>
+                        <button class="btn btn-secondary" onclick="closeModal('editScoreModal')">ยกเลิก</button>
                     </div>
                 </div>
             </div>
@@ -733,6 +747,10 @@
         let currentEditStudentId = null;
         let allStudents = [];
         let currentRoomFilter = 'all';
+        let video = null;
+        let canvas = null;
+        let canvasContext = null;
+        let scanning = false;
 
         // Check system status
         function checkSystemStatus(callback) {
@@ -743,29 +761,7 @@
             }, (error) => {
                 console.error(`Error checking system status: ${error.code} - ${error.message}`);
                 showNotification(`ไม่สามารถตรวจสอบสถานะระบบ: ${error.message}`, 'error');
-                callback('open'); // Default to open if error
-            });
-        }
-
-        // Load score options
-        function loadScoreOptions() {
-            const scoreSelect = document.getElementById('scoreChange');
-            const settingsRef = database.ref('settings/scoreOptions');
-            console.log(`Loading score options from: ${settingsRef.toString()}`);
-            settingsRef.once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    const options = snapshot.val();
-                    scoreSelect.innerHTML = '<option value="">เลือกคะแนน</option>';
-                    options.forEach(option => {
-                        scoreSelect.innerHTML += `<option value="${option.value}">${option.label}</option>`;
-                    });
-                } else {
-                    console.warn("No score options found at /settings/scoreOptions");
-                    showNotification('ไม่พบตัวเลือกคะแนนในระบบ', 'error');
-                }
-            }, (error) => {
-                console.error(`Error loading /settings/scoreOptions: ${error.code} - ${error.message}`);
-                showNotification(`ไม่สามารถโหลดตัวเลือกคะแนน: ${error.message}`, 'error');
+                callback('open');
             });
         }
 
@@ -846,7 +842,6 @@
             document.getElementById('userName').textContent = userData.name;
             document.getElementById('userRole').textContent = currentRole === 'student' ? 'นักเรียน' : 'ครู';
             showTab('dashboard');
-            loadScoreOptions();
         }
 
         // Toggle menu
@@ -1061,42 +1056,6 @@
             renderStudents(filteredStudents);
         }
 
-        // Process scanned student (จากการสแกน QR Code)
-        function processScannedStudent() {
-            const scannedId = document.getElementById('scanStudentId').value.trim().toUpperCase();
-            if (!scannedId) {
-                showNotification('กรุณากรอกรหัสนักเรียนที่สแกนได้', 'error');
-                return;
-            }
-
-            const role = detectRole(scannedId);
-            if (role !== 'student') {
-                showNotification('รหัสที่สแกนไม่ใช่นักเรียน (ต้องเริ่มด้วย 3 และยาว 5 ตัว)', 'error');
-                return;
-            }
-
-            const studentRef = database.ref(`students/${scannedId}`);
-            studentRef.once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    const student = snapshot.val();
-                    currentEditStudentId = scannedId;
-                    document.getElementById('modalStudentName').textContent = student.name;
-                    document.getElementById('modalStudentId').textContent = scannedId;
-                    document.getElementById('modalStudentGrade').textContent = `${student.grade}/${student.room}`;
-                    document.getElementById('modalCurrentScore').textContent = student.score;
-                    document.getElementById('scoreChange').value = '';
-                    document.getElementById('scoreReason').value = '';
-                    document.getElementById('editScoreModal').style.display = 'flex';
-                    document.getElementById('scanStudentId').value = ''; // ล้างช่องหลังสแกน
-                } else {
-                    showNotification(`ไม่พบนักเรียน ${scannedId}`, 'error');
-                }
-            }, (error) => {
-                console.error(`Error at ${studentRef.toString()}: ${error.code} - ${error.message}`);
-                showNotification(`ข้อผิดพลาดที่ ${studentRef.toString()}: ${error.message}`, 'error');
-            });
-        }
-
         // Load notifications
         function loadNotifications() {
             const notifRef = database.ref('notifications').orderByChild('userId').equalTo(currentUser.id);
@@ -1167,7 +1126,7 @@
                     document.getElementById('modalStudentId').textContent = studentId;
                     document.getElementById('modalStudentGrade').textContent = `${student.grade}/${student.room}`;
                     document.getElementById('modalCurrentScore').textContent = student.score;
-                    document.getElementById('scoreChange').value = '';
+                    document.getElementById('scoreChange').value = '0';
                     document.getElementById('scoreReason').value = '';
                     document.getElementById('editScoreModal').style.display = 'flex';
                 } else {
@@ -1186,57 +1145,51 @@
             currentEditStudentId = null;
         }
 
-        // Submit score change request
-        function submitScoreChangeRequest() {
+        // Submit score change
+        function submitScoreChange() {
             if (!currentEditStudentId) {
                 showNotification('ไม่พบนักเรียนสำหรับแก้ไข', 'error');
                 return;
             }
 
-            const scoreChange = document.getElementById('scoreChange').value;
+            const scoreChange = parseInt(document.getElementById('scoreChange').value);
             const reason = document.getElementById('scoreReason').value.trim();
 
-            if (!scoreChange) {
-                showNotification('กรุณาเลือกคะแนน', 'error');
-                return;
-            }
             if (!reason) {
                 showNotification('กรุณาระบุเหตุผล', 'error');
                 return;
             }
 
             const studentRef = database.ref(`students/${currentEditStudentId}`);
-            console.log(`Submitting request for student: ${currentEditStudentId}`);
             studentRef.once('value', (snapshot) => {
                 if (snapshot.exists()) {
                     const student = snapshot.val();
-                    const requestRef = database.ref('requests').push();
-                    const requestId = requestRef.key;
-                    requestRef.set({
-                        id: requestId,
-                        studentId: currentEditStudentId,
-                        studentName: student.name,
-                        teacherId: currentUser.id,
-                        teacherName: currentUser.name,
-                        scoreChange: parseInt(scoreChange),
-                        reason: reason,
-                        status: 'pending',
-                        requestDate: new Date().toISOString()
-                    }, (error) => {
+                    const newScore = Math.max(0, Math.min(100, student.score + scoreChange));
+                    const historyKey = database.ref(`students/${currentEditStudentId}/history`).push().key;
+                    const updateData = {
+                        score: newScore,
+                        [`history/${historyKey}`]: {
+                            change: scoreChange,
+                            reason: reason,
+                            teacher: currentUser.name,
+                            timestamp: new Date().toISOString()
+                        }
+                    };
+
+                    studentRef.update(updateData, (error) => {
                         if (error) {
-                            console.error(`Error at ${requestRef.toString()}: ${error.code} - ${error.message}`);
-                            showNotification(`ข้อผิดพลาดที่ ${requestRef.toString()}: ${error.message}`, 'error');
+                            console.error(`Error at ${studentRef.toString()}: ${error.code} - ${error.message}`);
+                            showNotification(`ข้อผิดพลาดที่ ${studentRef.toString()}: ${error.message}`, 'error');
                             return;
                         }
 
                         const notifRef = database.ref('notifications').push();
-                        console.log(`Creating notification for ${currentUser.id}`);
                         notifRef.set({
                             id: notifRef.key,
-                            userId: currentUser.id,
-                            title: 'ส่งคำขอเปลี่ยนคะแนน',
-                            message: `ส่งคำขอเปลี่ยนคะแนน ${scoreChange} สำหรับ ${student.name}`,
-                            type: 'request_submitted',
+                            userId: currentEditStudentId,
+                            title: 'คะแนนถูกปรับเปลี่ยน',
+                            message: `คะแนนของคุณถูก ${scoreChange >= 0 ? 'เพิ่ม' : 'หัก'} ${Math.abs(scoreChange)} โดย ${currentUser.name} เหตุผล: ${reason}`,
+                            type: 'score_updated',
                             read: false,
                             timestamp: new Date().toISOString()
                         }, (error) => {
@@ -1245,9 +1198,9 @@
                             }
                         });
 
+                        showNotification(`ปรับคะแนนสำเร็จ: ${scoreChange >= 0 ? '+' : ''}${scoreChange} (คะแนนใหม่: ${newScore})`, 'success');
                         closeModal('editScoreModal');
-                        showNotification('ส่งคำขอสำเร็จ', 'success');
-                        loadRequests();
+                        loadStudentData(); // อัปเดตข้อมูลนักเรียนหากครูดูข้อมูลตัวเอง
                     });
                 } else {
                     console.warn(`Student ${currentEditStudentId} not found`);
@@ -1264,6 +1217,7 @@
             currentUser = null;
             currentRole = null;
             currentRoomFilter = 'all';
+            stopCamera();
             localStorage.removeItem('currentUser');
             localStorage.removeItem('currentRole');
             document.getElementById('userId').value = '';
@@ -1280,6 +1234,63 @@
             notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
             document.body.appendChild(notification);
             setTimeout(() => notification.remove(), 5000);
+        }
+
+        // Camera functions
+        function startCamera() {
+            video = document.getElementById('video');
+            canvas = document.getElementById('canvas');
+            canvasContext = canvas.getContext('2d');
+
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                    .then(stream => {
+                        video.srcObject = stream;
+                        video.play();
+                        document.getElementById('startCameraBtn').style.display = 'none';
+                        document.getElementById('stopCameraBtn').style.display = 'inline-block';
+                        scanning = true;
+                        requestAnimationFrame(tick);
+                    })
+                    .catch(error => {
+                        console.error('Error accessing camera:', error);
+                        showNotification('ไม่สามารถเข้าถึงกล้อง: ' + error.message, 'error');
+                    });
+            }
+        }
+
+        function stopCamera() {
+            if (video && video.srcObject) {
+                const tracks = video.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
+                scanning = false;
+                document.getElementById('startCameraBtn').style.display = 'inline-block';
+                document.getElementById('stopCameraBtn').style.display = 'none';
+            }
+        }
+
+        function tick() {
+            if (video.readyState === video.HAVE_ENOUGH_DATA && scanning) {
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+                canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+
+                if (code) {
+                    const scannedId = code.data.trim().toUpperCase();
+                    if (detectRole(scannedId) === 'student') {
+                        stopCamera();
+                        openEditScoreModal(scannedId);
+                    } else {
+                        showNotification('รหัสที่สแกนไม่ใช่นักเรียน (ต้องเริ่มด้วย 3 และยาว 5 ตัว)', 'error');
+                    }
+                }
+            }
+            if (scanning) {
+                requestAnimationFrame(tick);
+            }
         }
 
         // Event listeners
@@ -1306,14 +1317,11 @@
             document.getElementById('password').addEventListener('keypress', e => {
                 if (e.key === 'Enter') login();
             });
-            document.getElementById('scoreChange').addEventListener('keypress', e => {
-                if (e.key === 'Enter') submitScoreChangeRequest();
+            document.getElementById('scoreReason').addEventListener('keypress', e => {
+                if (e.key === 'Enter') submitScoreChange();
             });
             document.getElementById('teacherSearch')?.addEventListener('keypress', e => {
                 if (e.key === 'Enter') searchStudents('teacher');
-            });
-            document.getElementById('scanStudentId')?.addEventListener('keypress', e => {
-                if (e.key === 'Enter') processScannedStudent();
             });
 
             document.addEventListener('click', (e) => {
