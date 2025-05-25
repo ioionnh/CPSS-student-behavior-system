@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบหักคะแนนความประพฤติ - โรงเรียนชุมแพศึกษา</title>
+    <!-- ปิดการเลือกข้อความเพื่อป้องกันการคัดลอก -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <!-- Firebase Compat SDK -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
@@ -19,6 +23,11 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            /* ป้องกันการเลือกข้อความ */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
         body {
@@ -149,6 +158,11 @@
             font-size: 16px;
             font-family: 'Kanit', sans-serif;
             transition: all 0.3s ease;
+            /* อนุญาตให้เลือกข้อความใน input เท่านั้น */
+            user-select: text;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
         }
 
         input:focus, select:focus, textarea:focus {
@@ -457,10 +471,6 @@
             flex-wrap: wrap;
         }
 
-        #qrUpload {
-            margin-top: 10px;
-        }
-
         .qrcode-container {
             margin-top: 20px;
             text-align: center;
@@ -675,8 +685,6 @@
                         <div class="camera-controls">
                             <button class="btn" id="startCameraBtn" onclick="startScanner()"><i class="fas fa-camera"></i> เปิดกล้อง</button>
                             <button class="btn btn-secondary" id="stopCameraBtn" onclick="stopScanner()" style="display: none;"><i class="fas fa-camera-slash"></i> ปิดกล้อง</button>
-                            <input type="file" id="qrUpload" accept="image/*" onchange="scanFromImage()" style="display: none;">
-                            <button class="btn btn-secondary" id="uploadBtn" onclick="document.getElementById('qrUpload').click()"><i class="fas fa-upload"></i> อัปโหลดภาพ</button>
                         </div>
                         <div id="scanStatus">กด "เปิดกล้อง" เพื่อเริ่มสแกน QR Code</div>
                         <div id="scanTips">
@@ -725,7 +733,7 @@
             <div id="editScoreModal" class="modal">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3>ปรับเปลี่ยนคะแนนความประพฤติ</h3>
+                        <h3>ส่งคำขอเปลี่ยนคะแนน</h3>
                         <button class="close-btn" onclick="closeModal('editScoreModal')">×</button>
                     </div>
                     <div class="form-group">
@@ -755,7 +763,7 @@
                         <textarea id="scoreReason" rows="4" placeholder="ระบุเหตุผลการเปลี่ยนแปลงคะแนน" required></textarea>
                     </div>
                     <div class="modal-actions">
-                        <button class="btn btn-success" onclick="submitScoreChange()">ยืนยัน</button>
+                        <button class="btn btn-success" onclick="submitScoreChangeRequest()">ส่งคำขอ</button>
                         <button class="btn btn-secondary" onclick="closeModal('editScoreModal')">ยกเลิก</button>
                     </div>
                 </div>
@@ -764,6 +772,81 @@
     </div>
 
     <script>
+        // ป้องกันการกด F12, Ctrl+Shift+I, Ctrl+U และการคลิกขวา
+        document.addEventListener('keydown', function(event) {
+            // ป้องกัน F12
+            if (event.keyCode === 123) {
+                event.preventDefault();
+                alert('การเข้าถึงเครื่องมือพัฒนา (F12) ถูกปิดใช้งานเพื่อความปลอดภัย');
+                return false;
+            }
+            // ป้องกัน Ctrl+Shift+I
+            if (event.ctrlKey && event.shiftKey && event.keyCode === 73) {
+                event.preventDefault();
+                alert('การเข้าถึงเครื่องมือพัฒนา (Ctrl+Shift+I) ถูกปิดใช้งานเพื่อความปลอดภัย');
+                return false;
+            }
+            // ป้องกัน Ctrl+U (View Page Source)
+            if (event.ctrlKey && event.keyCode === 85) {
+                event.preventDefault();
+                alert('การดูซอร์สโค้ด (Ctrl+U) ถูกปิดใช้งานเพื่อความปลอดภัย');
+                return false;
+            }
+            // ป้องกัน Ctrl+Shift+C (Inspect Element)
+            if (event.ctrlKey && event.shiftKey && event.keyCode === 67) {
+                event.preventDefault();
+                alert('การเข้าถึงเครื่องมือพัฒนา (Ctrl+Shift+C) ถูกปิดใช้งานเพื่อความปลอดภัย');
+                return false;
+            }
+            // ป้องกัน Ctrl+Shift+J (Console)
+            if (event.ctrlKey && event.shiftKey && event.keyCode === 74) {
+                event.preventDefault();
+                alert('การเข้าถึงเครื่องมือพัฒนา (Ctrl+Shift+J) ถูกปิดใช้งานเพื่อความปลอดภัย');
+                return false;
+            }
+        });
+
+        // ป้องกันการคลิกขวา
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+            alert('การคลิกขวาเพื่อดูซอร์สโค้ดถูกปิดใช้งานเพื่อความปลอดภัย');
+            return false;
+        });
+
+        // ตรวจจับการเปิด Developer Tools
+        function detectDevTools() {
+            const threshold = 160; // ความกว้าง/สูงที่บ่งบอกว่า DevTools เปิดอยู่
+            const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+            const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+            if (widthThreshold || heightThreshold) {
+                alert('ตรวจพบการเปิดเครื่องมือพัฒนา! ระบบจะป้องกันการเข้าถึง');
+                // เปลี่ยนหน้าไปที่หน้าอื่น (เช่น หน้าแรก)
+                window.location.href = window.location.pathname;
+            }
+        }
+
+        // เรียกใช้การตรวจจับ DevTools ทุก 1 วินาที
+        setInterval(detectDevTools, 1000);
+
+        // ป้องกันการเลือกข้อความ
+        document.addEventListener('selectstart', function(event) {
+            if (!event.target.tagName.match(/^(INPUT|TEXTAREA)$/)) {
+                event.preventDefault();
+            }
+        });
+
+        // ป้องกันการคัดลอก
+        document.addEventListener('copy', function(event) {
+            event.preventDefault();
+            alert('การคัดลอกถูกปิดใช้งานเพื่อความปลอดภัย');
+        });
+
+        // ป้องกันการตัด
+        document.addEventListener('cut', function(event) {
+            event.preventDefault();
+            alert('การตัดถูกปิดใช้งานเพื่อความปลอดภัย');
+        });
+
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBbNFy44oahsNgMcmSOzqWIZBsGuM2j074",
@@ -814,6 +897,8 @@
                 return 'student';
             } else if (userId.startsWith('T') && userId.length === 4) {
                 return 'teacher';
+            } else if (userId.startsWith('A') && userId.length === 4) {
+                return 'admin';
             }
             return null;
         }
@@ -836,20 +921,22 @@
 
                 currentRole = detectRole(userId);
                 if (!currentRole) {
-                    showNotification('รหัสผู้ใช้ไม่ถูกต้อง (นักเรียน: 3xxxx, ครู: Txxx)', 'error');
+                    showNotification('รหัสผู้ใช้ไม่ถูกต้อง (นักเรียน: 3xxxx, ครู: Txxx, ผู้บริหาร: Axxx)', 'error');
                     return;
                 }
 
                 if (currentRole !== 'student' && !password) {
-                    showNotification('กรุณากรอกรหัสผ่านสำหรับครู', 'error');
+                    showNotification(`กรุณากรอกรหัสผ่านสำหรับ${currentRole === 'teacher' ? 'ครู' : 'ผู้บริหาร'}`, 'error');
                     return;
                 }
 
                 let userRef;
                 if (currentRole === 'student') {
                     userRef = database.ref(`students/${userId}`);
-                } else {
+                } else if (currentRole === 'teacher') {
                     userRef = database.ref(`teachers/${userId}`);
+                } else {
+                    userRef = database.ref(`admins/${userId}`);
                 }
 
                 console.log(`Reading user data from: ${userRef.toString()}`);
@@ -862,11 +949,11 @@
                             localStorage.setItem('currentRole', currentRole);
                             completeLogin(userData);
                         } else {
-                            showNotification('รหัสผ่านครูไม่ถูกต้อง', 'error');
+                            showNotification(`รหัสผ่าน${currentRole === 'teacher' ? 'ครู' : 'ผู้บริหาร'}ไม่ถูกต้อง`, 'error');
                         }
                     } else {
                         console.warn(`User ${userId} not found at ${userRef.toString()}`);
-                        showNotification(`ไม่พบ${currentRole === 'student' ? 'นักเรียน' : 'ครู'} ${userId}`, 'error');
+                        showNotification(`ไม่พบ${currentRole === 'student' ? 'นักเรียน' : currentRole === 'teacher' ? 'ครู' : 'ผู้บริหาร'} ${userId}`, 'error');
                     }
                 }, (error) => {
                     console.error(`Error at ${userRef.toString()}: ${error.code} - ${error.message}`);
@@ -881,7 +968,7 @@
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('mainSection').classList.remove('hidden');
             document.getElementById('userName').textContent = userData.name;
-            document.getElementById('userRole').textContent = currentRole === 'student' ? 'นักเรียน' : 'ครู';
+            document.getElementById('userRole').textContent = currentRole === 'student' ? 'นักเรียน' : currentRole === 'teacher' ? 'ครู' : 'ผู้บริหาร';
             showTab('dashboard');
         }
 
@@ -1137,6 +1224,7 @@
                     container.innerHTML = filtered.map(req => `
                         <div class="request-card">
                             <h4>นักเรียน: ${req.studentName}</h4>
+                            <p>รหัส: ${req.studentId}</p>
                             <p>คะแนน: ${req.scoreChange >= 0 ? '+' : ''}${req.scoreChange}</p>
                             <p>เหตุผล: ${req.reason}</p>
                             <p style="color: #666; font-size: 0.9rem;">วันที่ขอ: ${new Date(req.requestDate).toLocaleString('th-TH')}</p>
@@ -1186,15 +1274,20 @@
             currentEditStudentId = null;
         }
 
-        // Submit score change
-        function submitScoreChange() {
+        // Submit score change request
+        function submitScoreChangeRequest() {
             if (!currentEditStudentId) {
-                showNotification('ไม่พบนักเรียนสำหรับแก้ไข', 'error');
+                showNotification('ไม่พบนักเรียนสำหรับส่งคำขอ', 'error');
                 return;
             }
 
             const scoreChange = parseInt(document.getElementById('scoreChange').value);
             const reason = document.getElementById('scoreReason').value.trim();
+
+            if (scoreChange === 0) {
+                showNotification('กรุณาเลือกการเปลี่ยนแปลงคะแนน', 'error');
+                return;
+            }
 
             if (!reason) {
                 showNotification('กรุณาระบุเหตุผล', 'error');
@@ -1205,44 +1298,70 @@
             studentRef.once('value', (snapshot) => {
                 if (snapshot.exists()) {
                     const student = snapshot.val();
-                    const newScore = Math.max(0, Math.min(100, student.score + scoreChange));
-                    const historyKey = database.ref(`students/${currentEditStudentId}/history`).push().key;
-                    const updateData = {
-                        score: newScore,
-                        [`history/${historyKey}`]: {
-                            change: scoreChange,
-                            reason: reason,
-                            teacher: currentUser.name,
-                            timestamp: new Date().toISOString()
-                        }
+
+                    // สร้างคำขอใน Firebase
+                    const requestRef = database.ref('requests').push();
+                    const requestData = {
+                        id: requestRef.key,
+                        studentId: currentEditStudentId,
+                        studentName: student.name,
+                        teacherId: currentUser.id,
+                        teacherName: currentUser.name,
+                        scoreChange: scoreChange,
+                        reason: reason,
+                        status: 'pending',
+                        requestDate: new Date().toISOString()
                     };
 
-                    studentRef.update(updateData, (error) => {
+                    requestRef.set(requestData, (error) => {
                         if (error) {
-                            console.error(`Error at ${studentRef.toString()}: ${error.code} - ${error.message}`);
-                            showNotification(`ข้อผิดพลาดที่ ${studentRef.toString()}: ${error.message}`, 'error');
+                            console.error(`Error at ${requestRef.toString()}: ${error.code} - ${error.message}`);
+                            showNotification(`ข้อผิดพลาดที่ ${requestRef.toString()}: ${error.message}`, 'error');
                             return;
                         }
 
-                        const notifRef = database.ref('notifications').push();
-                        notifRef.set({
-                            id: notifRef.key,
-                            userId: currentEditStudentId,
-                            title: 'คะแนนถูกปรับเปลี่ยน',
-                            message: `คะแนนของคุณถูก ${scoreChange >= 0 ? 'เพิ่ม' : 'หัก'} ${Math.abs(scoreChange)} โดย ${currentUser.name} เหตุผล: ${reason}`,
-                            type: 'score_updated',
+                        // แจ้งเตือนผู้บริหาร
+                        database.ref('admins').once('value', (adminSnapshot) => {
+                            if (adminSnapshot.exists()) {
+                                const admins = Object.keys(adminSnapshot.val());
+                                admins.forEach(adminId => {
+                                    const notifRef = database.ref('notifications').push();
+                                    notifRef.set({
+                                        id: notifRef.key,
+                                        userId: adminId,
+                                        title: 'คำขอเปลี่ยนคะแนนใหม่',
+                                        message: `ครู ${currentUser.name} ขอเปลี่ยนคะแนนนักเรียน ${student.name} (${currentEditStudentId}) ${scoreChange >= 0 ? '+' : ''}${scoreChange} เหตุผล: ${reason}`,
+                                        type: 'score_request',
+                                        read: false,
+                                        timestamp: new Date().toISOString()
+                                    }, (error) => {
+                                        if (error) {
+                                            console.error(`Error at ${notifRef.toString()}: ${error.code} - ${error.message}`);
+                                        }
+                                    });
+                                });
+                            }
+                        });
+
+                        // แจ้งเตือนครู
+                        const teacherNotifRef = database.ref('notifications').push();
+                        teacherNotifRef.set({
+                            id: teacherNotifRef.key,
+                            userId: currentUser.id,
+                            title: 'ส่งคำขอเปลี่ยนคะแนนสำเร็จ',
+                            message: `คุณได้ส่งคำขอเปลี่ยนคะแนนนักเรียน ${student.name} (${currentEditStudentId}) ${scoreChange >= 0 ? '+' : ''}${scoreChange} รอผู้บริหารอนุมัติ`,
+                            type: 'score_request_submitted',
                             read: false,
                             timestamp: new Date().toISOString()
                         }, (error) => {
                             if (error) {
-                                console.error(`Error at ${notifRef.toString()}: ${error.code} - ${error.message}`);
+                                console.error(`Error at ${teacherNotifRef.toString()}: ${error.code} - ${error.message}`);
                             }
                         });
 
-                        showNotification(`ปรับคะแนนสำเร็จ: ${scoreChange >= 0 ? '+' : ''}${scoreChange} (คะแนนใหม่: ${newScore})`, 'success');
+                        showNotification(`ส่งคำขอเปลี่ยนคะแนนสำเร็จ: ${scoreChange >= 0 ? '+' : ''}${scoreChange}`, 'success');
                         closeModal('editScoreModal');
-                        loadStudentData();
-                        loadTeacherData(); // รีเฟรชข้อมูลครู
+                        loadRequests();
                     });
                 } else {
                     console.warn(`Student ${currentEditStudentId} not found`);
@@ -1342,40 +1461,6 @@
             }, 3000);
         }
 
-        function scanFromImage() {
-            const fileInput = document.getElementById('qrUpload');
-            const file = fileInput.files[0];
-            if (!file) return;
-
-            const html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.scanFile(file, true)
-                .then(result => {
-                    const scannedId = result.trim().toUpperCase();
-                    if (detectRole(scannedId) === 'student') {
-                        const studentRef = database.ref(`students/${scannedId}`);
-                        studentRef.once('value', (snapshot) => {
-                            if (snapshot.exists()) {
-                                const student = snapshot.val();
-                                document.getElementById('result').innerHTML = `<h2>สแกนสำเร็จจากภาพ!</h2><p>รหัส: ${scannedId} - ${student.name}</p>`;
-                                showNotification(`สแกนสำเร็จสำหรับ ${student.name} (รหัส: ${scannedId})`, 'success');
-                                openEditScoreModal(scannedId);
-                            } else {
-                                document.getElementById('result').innerHTML = `<h2>ล้มเหลว!</h2><p>ไม่พบนักเรียนรหัส ${scannedId}</p>`;
-                            }
-                        });
-                    } else {
-                        document.getElementById('result').innerHTML = `<h2>ล้มเหลว!</h2><p>รหัส ${scannedId} ไม่ใช่นักเรียน (ต้องเริ่มด้วย 3 และยาว 5 ตัว)</p>`;
-                    }
-                })
-                .catch(err => {
-                    document.getElementById('result').innerHTML = `<h2>ข้อผิดพลาด!</h2><p>ไม่พบ QR Code ในภาพ: ${err}</p>`;
-                })
-                .finally(() => {
-                    fileInput.value = '';
-                    setTimeout(() => document.getElementById('result').innerHTML = '', 3000);
-                });
-        }
-
         // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
             const storedUser = localStorage.getItem('currentUser');
@@ -1401,7 +1486,7 @@
                 if (e.key === 'Enter') login();
             });
             document.getElementById('scoreReason').addEventListener('keypress', e => {
-                if (e.key === 'Enter') submitScoreChange();
+                if (e.key === 'Enter') submitScoreChangeRequest();
             });
             document.getElementById('teacherSearch')?.addEventListener('keypress', e => {
                 if (e.key === 'Enter') searchStudents('teacher');
